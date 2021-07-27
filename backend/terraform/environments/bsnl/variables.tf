@@ -1,7 +1,6 @@
 # General variables
 variable "current_directory"{}
 variable "aws_region"{}
-variable "aws_profile"{}
 variable "environment"{}
 variable "prefix"{}
 variable "app_version"{}
@@ -19,6 +18,11 @@ variable "app_instance_type"{}
 variable "ebs_app_name"{}
 variable "autoscaling_min_size"{}
 variable "autoscaling_max_size"{}
+variable "ssl_certificate_id" {}
+
+# Lambda variables
+variable "s3_lambda_bucket" {}
+variable "s3_lambda_key" {}
 
 # APP environment variables
 variable "GOOGLE_CLIENT_ID"{}
@@ -30,6 +34,20 @@ variable "SWAGGER_PASSWORD"{}
 variable "TYPEORM_SYNCHRONIZE"{}
 variable "TOKEN_SECRET_KEY"{}
 variable "AUTH_CHECK"{}
+variable "APP_CONTEXT"{}
+variable "ADMIN_USERS"{}
+variable "CLIENT_API_SECRET"{}
+variable "CLIENT_API_KEY"{}
+variable "EXP_POINTS"{}
+variable "EXP_IDS"{}
+variable "GROUP_TYPES"{}
+variable "RDS_PASSWORD"{}
+variable "NEW_RELIC_LICENSE_KEY"{}
+variable "NEW_RELIC_APP_NAME" {}
+
+# Email
+variable "EMAIL_FROM" {}
+variable "EMAIL_EXPIRE_AFTER_SECONDS" {}
 
 # CICD variables
 variable "repository_name"{}

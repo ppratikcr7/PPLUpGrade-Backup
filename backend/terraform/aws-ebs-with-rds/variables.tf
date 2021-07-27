@@ -85,7 +85,7 @@ variable "AWS_REGION" { default = "us-east-1" }
 variable "CONTROLLERS" { default = "src/api/controllers/**/*Controller.ts" }
 variable "GOOGLE_CLIENT_ID" { }
 variable "DOMAIN_NAME" { default = "" }
-variable "HOST_URL" { default = "http://upgrade-development.us-east-1.elasticbeanstalk.com/api" }
+variable "HOST_URL" { default = "http://upgrade-bsnl.us-east-1.elasticbeanstalk.com/api" }
 variable "INTERCEPTORS" { default = "src/api/interceptors/**/*Interceptor.ts" }
 variable "LOG_LEVEL" { default = "debug" }
 variable "LOG_OUTPUT" { default = "dev" }
@@ -123,5 +123,10 @@ variable "PATH_TO_PUBLIC_KEY" {}
 variable "EMAIL_FROM" {}
 variable "EMAIL_EXPIRE_AFTER_SECONDS" {}
 variable "EMAIL_BUCKET" {}
-variable "CONTEXT" {}
+variable "APP_CONTEXT" {}
 variable "ADMIN_USERS" {}
+variable "CLIENT_API_SECRET" {}
+variable "CLIENT_API_KEY" {}
+variable "EXP_POINTS" {}
+variable "EXP_IDS" {}
+variable "GROUP_TYPES" {}

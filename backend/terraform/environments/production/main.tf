@@ -91,13 +91,13 @@ module "aws-ebs-app" {
   AUTH_CHECK            = var.AUTH_CHECK
   TOKEN_SECRET_KEY      = var.TOKEN_SECRET_KEY 
   TYPEORM_SYNCHRONIZE   = var.TYPEORM_SYNCHRONIZE
-  CONTEXT               = var.CONTEXT
+  APP_CONTEXT           = var.APP_CONTEXT
   ADMIN_USERS           = var.ADMIN_USERS
   RDS_PASSWORD          = var.RDS_PASSWORD
 
   SCHEDULER_STEP_FUNCTION = module.aws-state-machine.step_function_arn
-  PATH_TO_PRIVATE_KEY     = "id_rsa"
-  PATH_TO_PUBLIC_KEY      = "id_rsa.pub"
+  PATH_TO_PRIVATE_KEY     = "~/.ssh/id_rsa"
+  PATH_TO_PUBLIC_KEY      = "~/.ssh/id_rsa.pub"
   DOMAIN_NAME             = var.DOMAIN_NAME
 
   EMAIL_FROM                      = var.EMAIL_FROM

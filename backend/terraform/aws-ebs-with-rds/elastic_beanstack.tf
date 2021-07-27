@@ -354,12 +354,43 @@ resource "aws_elastic_beanstalk_environment" "upgrade-app-prod" {
   }
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
-    name      = "CONTEXT"
-    value     = var.CONTEXT
+    name      = "APP_CONTEXT"
+    value     = var.APP_CONTEXT
   }
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
     name      = "ADMIN_USERS"
     value     = var.ADMIN_USERS
   }
+
+  setting {
+    namespace = "aws:elasticbeanstalk:application:environment"
+    name      = "CLIENT_API_SECRET"
+    value     = var.CLIENT_API_SECRET
+  }
+
+  setting {
+    namespace = "aws:elasticbeanstalk:application:environment"
+    name      = "CLIENT_API_KEY"
+    value     = var.CLIENT_API_KEY
+  }
+
+  setting {
+    namespace = "aws:elasticbeanstalk:application:environment"
+    name      = "EXP_POINTS"
+    value     = var.EXP_POINTS
+  }
+
+  setting {
+    namespace = "aws:elasticbeanstalk:application:environment"
+    name      = "EXP_IDS"
+    value     = var.EXP_IDS
+  }
+
+  setting {
+    namespace = "aws:elasticbeanstalk:application:environment"
+    name      = "GROUP_TYPES"
+    value     = var.GROUP_TYPES
+  }
+
 }
