@@ -61,7 +61,7 @@
       "role": "admin"
     },
     {
-      "email": "dhaval.prajapati@playpowerlabs.com",
+      "email": "pratik.prajapati@playpowerlabs.com",
       "role": "admin"
     },
     {
@@ -72,8 +72,18 @@
       "email": "dhrushit@playpowerlabs.com",
       "role": "admin"
     }
+    ,
+    {
+      "email": "ridham.shah@playpowerlabs.com",
+      "role": "admin"
+    }
+    ,
+    {
+      "email": "yashil.depani@playpowerlabs.com",
+      "role": "admin"
+    }
   ],
-  "context": [
+  "app_context": [
     "app",
     "addition",
     "subtraction",
