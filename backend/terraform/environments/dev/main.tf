@@ -33,12 +33,13 @@ module "aws_lambda_function" {
   function_name         = "Schedule" 
   function_handler      = "schedule.schedule"
   runtime               =  "nodejs10.x"
+  s3_lambda_bucket      = var.s3_lambda_bucket
+  s3_lambda_key         = var.s3_lambda_key
 }
 
 output "lambda"{
   value = module.aws_lambda_function.lambda-arn
 }
-
 
 module "aws-state-machine" {
 
@@ -51,6 +52,16 @@ module "aws-state-machine" {
   lambda_arn            = module.aws_lambda_function.lambda-arn[0] 
 }
 
+module "aws-email-bucket" {
+  source                = "../../aws-email-bucket"
+
+  environment           = var.environment 
+  prefix                = var.prefix 
+}
+
+output "email-bucket" {
+  value = module.aws-email-bucket.s3-bucket
+}
 
 module "aws-ebs-app" {
 
@@ -72,6 +83,7 @@ module "aws-ebs-app" {
   ebs_app_name          = var.ebs_app_name
   autoscaling_min_size  = var.autoscaling_min_size
   autoscaling_max_size  = var.autoscaling_max_size
+  ssl_certificate_id    = var.ssl_certificate_id
 
   /* APP env config*/
   GOOGLE_CLIENT_ID      = var.GOOGLE_CLIENT_ID
@@ -81,11 +93,18 @@ module "aws-ebs-app" {
   TOKEN_SECRET_KEY      = var.TOKEN_SECRET_KEY 
   TYPEORM_SYNCHRONIZE   = var.TYPEORM_SYNCHRONIZE
   TYPEORM_MAX_QUERY_EXECUTION_TIME = var.TYPEORM_MAX_QUERY_EXECUTION_TIME
+  APP_CONTEXT           = var.APP_CONTEXT
+  ADMIN_USERS           = var.ADMIN_USERS
+  RDS_PASSWORD          = var.RDS_PASSWORD
 
   SCHEDULER_STEP_FUNCTION = module.aws-state-machine.step_function_arn
   PATH_TO_PRIVATE_KEY     = "~/.ssh/id_rsa"
   PATH_TO_PUBLIC_KEY      = "~/.ssh/id_rsa.pub"
   DOMAIN_NAME             = var.DOMAIN_NAME
+
+  EMAIL_FROM                      = var.EMAIL_FROM
+  EMAIL_EXPIRE_AFTER_SECONDS      = var.EMAIL_EXPIRE_AFTER_SECONDS
+  EMAIL_BUCKET                    = module.aws-email-bucket.s3-bucket
 }
 
 resource "null_resource" "update-ebs-env" { 
@@ -96,7 +115,7 @@ resource "null_resource" "update-ebs-env" {
   }
   
   provisioner "local-exec" {
-    command = "export AWS_PROFILE=${var.aws_profile} && aws elasticbeanstalk update-environment --region ${var.aws_region} --environment-name ${module.aws-ebs-app.ebs-env} --option-settings Namespace=aws:elasticbeanstalk:application:environment,OptionName=HOST_URL,Value=http://${module.aws-ebs-app.ebs-cname}/api"
+    command = "aws elasticbeanstalk update-environment --region ${var.aws_region} --environment-name ${module.aws-ebs-app.ebs-env} --option-settings Namespace=aws:elasticbeanstalk:application:environment,OptionName=HOST_URL,Value=http://${module.aws-ebs-app.ebs-cname}/api"
   }
 }
 
@@ -108,30 +127,34 @@ module "aws_cloudwatch_event" {
     environment           = var.environment 
 }
 
-module "aws-code-pipeline"{
+# module "aws-code-pipeline"{
 
-  source = "../../aws-codepipeline"
+#   source = "../../aws-codepipeline"
 
-  environment           = var.environment 
-  prefix                = var.prefix 
-  aws_region            = var.aws_region
+#   environment           = var.environment 
+#   prefix                = var.prefix 
+#   aws_region            = var.aws_region
 
-  /* CODE COMMIT variables*/
-  repository_name       = var.repository_name
-  branch_name           = var.branch_name
+#   /* CODE COMMIT variables*/
+#   repository_name       = var.repository_name
+#   branch_name           = var.branch_name
 
-  /* CODE BUILD variables*/
-  build_image           = var.build_image
-  build_compute_type    = var.build_compute_type
-  privileged_mode       = var.privileged_mode
+#   /* CODE BUILD variables*/
+#   build_image           = var.build_image
+#   build_compute_type    = var.build_compute_type
+#   privileged_mode       = var.privileged_mode
 
-  ebs_app_name          = module.aws-ebs-app.application 
-  ebs_env_name          = module.aws-ebs-app.ebs-env
-}
+#   ebs_app_name          = module.aws-ebs-app.application 
+#   ebs_env_name          = module.aws-ebs-app.ebs-env
+# }
 
 output "ebs-cname" {
   value = module.aws-ebs-app.ebs-cname
 }
 output "step_function" {
   value = module.aws-state-machine.step_function_arn
+}
+
+output "cloudwatch" {
+    value = module.aws_cloudwatch_event.name
 }
