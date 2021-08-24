@@ -1,7 +1,7 @@
 name: Development Backend Build and Deploy
 on:
   repository_dispatch:
-    types: [trigger-backend-build-dev]
+    types: [trigger-backend-build]
 jobs:
   #############################################  DEV ENV #############################################
   backend-build-deploy-dev:
