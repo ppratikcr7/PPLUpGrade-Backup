@@ -92,6 +92,7 @@ variable "EMAIL_BUCKET" {}
 variable "EMAIL_EXPIRE_AFTER_SECONDS" {}
 variable "EMAIL_FROM" {}
 variable "EXP_IDS"{}
+variable "EXP_POINTS"{}
 variable "GOOGLE_CLIENT_ID" { }
 variable "GROUP_TYPES"{}
 variable "HOST_URL" { default = "http://upgrade-development.us-east-1.elasticbeanstalk.com/api" }

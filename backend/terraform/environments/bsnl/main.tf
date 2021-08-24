@@ -28,7 +28,7 @@ module "aws_lambda_function" {
   environment           = var.environment 
   prefix                = var.prefix 
   app_version           = var.app_version 
-  lambda_path           = "../../packages/Schedular"  
+  #lambda_path           = "../../packages/Schedular"  
   output_path           = "../environments/${var.current_directory}/.terraform" 
   function_name         = "Schedule" 
   function_handler      = "schedule.schedule"
@@ -75,12 +75,17 @@ module "aws-ebs-app" {
 
   /* APP env config*/
   GOOGLE_CLIENT_ID      = var.GOOGLE_CLIENT_ID
+  CLIENT_API_KEY             = var.CLIENT_API_KEY
+  CLIENT_API_SECRET          = var.CLIENT_API_SECRET
   MONITOR_PASSWORD      = var.MONITOR_PASSWORD  
   SWAGGER_PASSWORD      = var.SWAGGER_PASSWORD 
   AUTH_CHECK            = var.AUTH_CHECK
   TOKEN_SECRET_KEY      = var.TOKEN_SECRET_KEY 
   TYPEORM_SYNCHRONIZE   = var.TYPEORM_SYNCHRONIZE
   TYPEORM_MAX_QUERY_EXECUTION_TIME = var.TYPEORM_MAX_QUERY_EXECUTION_TIME
+  GROUP_TYPES           = var.GROUP_TYPES
+  NEW_RELIC_LICENSE_KEY      = var.NEW_RELIC_LICENSE_KEY
+  EXP_IDS                    = var.EXP_IDS
 
   SCHEDULER_STEP_FUNCTION = module.aws-state-machine.step_function_arn
   PATH_TO_PRIVATE_KEY     = "~/.ssh/id_rsa"

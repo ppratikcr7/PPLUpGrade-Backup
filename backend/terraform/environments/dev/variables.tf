@@ -4,6 +4,7 @@ variable "aws_region"{}
 variable "environment"{}
 variable "prefix"{}
 variable "app_version"{}
+variable "aws_profile"{}
 
 # RDS related details 
 variable "allocated_storage"{}
@@ -25,13 +26,22 @@ variable "s3_lambda_bucket" {}
 variable "s3_lambda_key" {}
 
 # APP environment variables
+variable "EXP_IDS"{}
+variable "EXP_POINTS"{}
+
 variable "GOOGLE_CLIENT_ID"{}
+variable "GROUP_TYPES"{}
 variable "DOMAIN_NAME"{
     default     = ""
 }
+variable "CLIENT_API_KEY"{}
+variable "CLIENT_API_SECRET"{}
 variable "MONITOR_PASSWORD"{}
 variable "SWAGGER_PASSWORD"{}
 variable "TYPEORM_SYNCHRONIZE"{}
+variable "TYPEORM_MAX_QUERY_EXECUTION_TIME" {}
+variable "NEW_RELIC_APP_NAME" {}
+variable "NEW_RELIC_LICENSE_KEY" {}
 variable "TOKEN_SECRET_KEY"{}
 variable "AUTH_CHECK"{}
 variable "APP_CONTEXT"{}
