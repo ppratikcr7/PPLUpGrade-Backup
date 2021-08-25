@@ -39,8 +39,9 @@ export default async function testCase(): Promise<void> {
   expect(experimentUser.length).toEqual(0);
 
   // get all experiment condition for user 1
-  await expect(getAllExperimentCondition(experimentUsers[0].id)).rejects.toThrow();
+  const experimentConditionAssignments = await getAllExperimentCondition(experimentUsers[0].id);
+  expect(experimentConditionAssignments).toHaveLength(0);
 
   experimentUser = await experimentUserService.find();
-  expect(experimentUser.length).toEqual(0);
+  expect(experimentUser.length).toEqual(1);
 }

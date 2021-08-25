@@ -22,6 +22,7 @@ import { IndividualAssignment } from '../models/IndividualAssignment';
 import { GroupAssignment } from '../models/GroupAssignment';
 import { IndividualExclusion } from '../models/IndividualExclusion';
 import { GroupExclusion } from '../models/GroupExclusion';
+import { ExperimentUserRepository } from '../repositories/ExperimentUserRepository';
 import { Experiment } from '../models/Experiment';
 import { ExplicitIndividualExclusionRepository } from '../repositories/ExplicitIndividualExclusionRepository';
 import { ExplicitGroupExclusionRepository } from '../repositories/ExplicitGroupExclusionRepository';
@@ -68,6 +69,8 @@ export class ExperimentAssignmentService {
     private monitoredExperimentPointLogRepository: MonitoredExperimentPointLogRepository,
     @OrmRepository()
     private monitoredExperimentPointRepository: MonitoredExperimentPointRepository,
+    @OrmRepository()
+    private userRepository: ExperimentUserRepository,
     @OrmRepository()
     private explicitIndividualExclusionRepository: ExplicitIndividualExclusionRepository,
     @OrmRepository()
@@ -231,17 +234,12 @@ export class ExperimentAssignmentService {
       this.previewUserService.findOne(userId),
     ]);
 
-    const experimentUser: ExperimentUser = usersData[0];
+    let experimentUser: ExperimentUser = usersData[0];
     const previewUser: PreviewUser = usersData[1];
 
-    // throw error if user not defined
+    // create user if user not defined
     if (!experimentUser) {
-      throw new Error(
-        JSON.stringify({
-          type: SERVER_ERROR.EXPERIMENT_USER_NOT_DEFINED,
-          message: `User not defined : ${userId}`,
-        })
-      );
+      experimentUser = await this.userRepository.save({ id: userId });
     }
 
     // query all experiment and sub experiment
@@ -517,12 +515,12 @@ export class ExperimentAssignmentService {
   public async blobDataLog(userId: string, blobLog: ILogInput[]): Promise<Log[]> {
     this.log.info(`Add blob data userId ${userId} and value ${blobLog}`);
 
-    const userDoc = await this.experimentUserService.getOriginalUserDoc(userId);
+    let userDoc = await this.experimentUserService.getOriginalUserDoc(userId);
     const keyUniqueArray = [];
 
-    // throw error if user not defined
+    // create user if user does not exist
     if (!userDoc) {
-      throw new Error(`User not defined: ${userId}`);
+      userDoc = await this.userRepository.save({ id: userId });
     }
 
     // extract the array value
@@ -537,17 +535,12 @@ export class ExperimentAssignmentService {
   public async dataLog(userId: string, jsonLog: ILogInput[]): Promise<Log[]> {
     this.log.info(`Add data log userId ${userId} and value ${JSON.stringify(jsonLog, null, 2)}`);
 
-    const userDoc = await this.experimentUserService.getOriginalUserDoc(userId);
+    let userDoc = await this.experimentUserService.getOriginalUserDoc(userId);
     const keyUniqueArray = [];
 
-    // throw error if user not defined
+    // create user if user does not exist
     if (!userDoc) {
-      throw new Error(
-        JSON.stringify({
-          type: SERVER_ERROR.EXPERIMENT_USER_NOT_DEFINED,
-          message: `User not defined: ${userId}`,
-        })
-      );
+      userDoc = await this.userRepository.save({ id: userId });
     }
 
     // extract the array value
@@ -566,16 +559,11 @@ export class ExperimentAssignmentService {
     experimentId: string
   ): Promise<ExperimentError> {
     const error = new ExperimentError();
-    const userDoc = await this.experimentUserService.getOriginalUserDoc(userId);
+    let userDoc = await this.experimentUserService.getOriginalUserDoc(userId);
 
-    // throw error if user not defined
+    // create user if user does not exist
     if (!userDoc) {
-      throw new Error(
-        JSON.stringify({
-          type: SERVER_ERROR.EXPERIMENT_USER_NOT_DEFINED,
-          message: `User not defined: ${userId}`,
-        })
-      );
+      userDoc = await this.userRepository.save({ id: userId });
     }
 
     error.type = SERVER_ERROR.REPORTED_ERROR;

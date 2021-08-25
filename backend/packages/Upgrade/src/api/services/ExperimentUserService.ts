@@ -57,16 +57,10 @@ export class ExperimentUserService {
 
   public async setAliasesForUser(userId: string, aliases: string[]): Promise<ExperimentUser[]> {
     this.log.info('Set aliases for experiment user => ', userId, aliases);
-    const userExist = await this.getOriginalUserDoc(userId);
-
-    // throw error if user not defined
+    let userExist = await this.getOriginalUserDoc(userId);
     if (!userExist) {
-      throw new Error(
-        JSON.stringify({
-          type: SERVER_ERROR.EXPERIMENT_USER_NOT_DEFINED,
-          message: `User not defined: ${userId}`,
-        })
-      );
+      // Create experiment user if it does not exist
+      userExist = await this.userRepository.save({ id: userId });
     }
     const promiseArray = [];
     aliases.map((aliasId) => {
@@ -158,17 +152,8 @@ export class ExperimentUserService {
     this.log.info('Update working group => ', userId, workingGroup);
     const userExist = await this.getOriginalUserDoc(userId);
 
-    if (!userExist) {
-      throw new Error(
-        JSON.stringify({
-          type: SERVER_ERROR.EXPERIMENT_USER_NOT_DEFINED,
-          message: `User not defined: ${userId}`,
-        })
-      );
-    }
-
     // TODO check if workingGroup is the subset of group membership
-    const newDocument = { ...userExist, workingGroup };
+    const newDocument = userExist ? { ...userExist, workingGroup } : { id: userId, workingGroup };
     return this.userRepository.save(newDocument);
   }
 
@@ -186,21 +171,12 @@ export class ExperimentUserService {
 
     const userExist = await this.getOriginalUserDoc(userId);
 
-    if (!userExist) {
-      throw new Error(
-        JSON.stringify({
-          type: SERVER_ERROR.EXPERIMENT_USER_NOT_DEFINED,
-          message: `User not defined: ${userId}`,
-        })
-      );
-    }
-
     // update assignments
     if (userExist && userExist.group) {
       await this.removeAssignments(userExist.id, groupMembership, userExist.group);
     }
 
-    const newDocument = { ...userExist, group: groupMembership };
+    const newDocument = userExist ? { ...userExist, group: groupMembership } : { id: userId, group: groupMembership };
 
     // update group membership
     return this.userRepository.save(newDocument);
