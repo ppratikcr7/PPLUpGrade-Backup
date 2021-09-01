@@ -48,6 +48,6 @@ EMAIL_EXPIRE_AFTER_SECONDS      = 36000
 # Lambda variables
 s3_lambda_bucket        = "upgrade-schedular"
 s3_lambda_key           = "schedular.zip"
-ssl_certificate_id      = "arn:aws:acm:us-east-1:781188149671:certificate/1f1abbb8-f7b4-4700-9974-6e5b170cb1fa"
+ssl_certificate_id      = "arn:aws:acm:us-east-1:781188149671:certificate/87332134-ade5-43fa-9753-12c6c8634e7c"
 # Real values for secrets for this environment are stored in vault at
 #   internal/upgrade-experiment-service/environments/dev
