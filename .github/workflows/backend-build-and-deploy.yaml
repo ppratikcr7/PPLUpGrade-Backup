@@ -87,6 +87,7 @@ jobs:
           environment_name: ${{ secrets.EB_ENV_NAME }}
           version_label: ${{ github.sha }}
           region: ${{ secrets.AWS_REGION }}
+          use_existing_version_if_available: true
           deployment_package: backend/upgrade-backend-v-${{ github.sha}}.zip
 
       - name: Success Deploy Message

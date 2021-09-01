@@ -46,6 +46,7 @@ jobs:
         uses: ncipollo/release-action@v1
         with:
           artifacts: frontend/dist/abtesting/upgrade-frontend-v-${{ github.sha}}.zip
+          allowUpdates: true
           tag: upgrade-frontend-v-${{ github.sha }}
           name: Upgrade Frontend ${{ github.sha }}
           body: ${{ env.RELEASE_CHANGELOG }}
