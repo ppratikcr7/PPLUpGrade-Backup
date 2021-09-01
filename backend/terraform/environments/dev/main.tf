@@ -94,13 +94,10 @@ module "aws-ebs-app" {
   TOKEN_SECRET_KEY      = var.TOKEN_SECRET_KEY 
   TYPEORM_SYNCHRONIZE   = var.TYPEORM_SYNCHRONIZE
   TYPEORM_MAX_QUERY_EXECUTION_TIME = var.TYPEORM_MAX_QUERY_EXECUTION_TIME
-  APP_CONTEXT           = var.APP_CONTEXT
   ADMIN_USERS           = var.ADMIN_USERS
   RDS_PASSWORD          = var.RDS_PASSWORD
-  GROUP_TYPES           = var.GROUP_TYPES
+  CONTEXT_METADATA      = var.CONTEXT_METADATA
   NEW_RELIC_LICENSE_KEY      = var.NEW_RELIC_LICENSE_KEY
-  EXP_IDS                    = var.EXP_IDS
-  EXP_POINTS                    = var.EXP_POINTS
 
   SCHEDULER_STEP_FUNCTION = module.aws-state-machine.step_function_arn
   PATH_TO_PRIVATE_KEY     = "~/.ssh/id_rsa"

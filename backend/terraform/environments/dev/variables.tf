@@ -26,11 +26,9 @@ variable "s3_lambda_bucket" {}
 variable "s3_lambda_key" {}
 
 # APP environment variables
-variable "EXP_IDS"{}
-variable "EXP_POINTS"{}
+variable "CONTEXT_METADATA"{}
 
 variable "GOOGLE_CLIENT_ID"{}
-variable "GROUP_TYPES"{}
 variable "DOMAIN_NAME"{
     default     = ""
 }
@@ -44,7 +42,6 @@ variable "NEW_RELIC_APP_NAME" {}
 variable "NEW_RELIC_LICENSE_KEY" {}
 variable "TOKEN_SECRET_KEY"{}
 variable "AUTH_CHECK"{}
-variable "APP_CONTEXT"{}
 variable "ADMIN_USERS"{}
 variable "RDS_PASSWORD"{}
 
