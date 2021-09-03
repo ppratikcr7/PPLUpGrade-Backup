@@ -76,7 +76,7 @@ variable "ssl_certificate_id" {}
 # ---------------------------------------------------------------------------------------------------------------------
 variable "ADMIN_USERS" {}
 variable "APP_BANNER" { default = true }
-variable "APP_CONTEXT" {}
+variable "CONTEXT_METADATA" {}
 variable "APP_HOST" { default = "localhost" }
 variable "APP_NAME" { default = "A/B Testing Backend" }
 variable "APP_PORT" { default = 3030 }
@@ -91,10 +91,7 @@ variable "DOMAIN_NAME" { default = "" }
 variable "EMAIL_BUCKET" {}
 variable "EMAIL_EXPIRE_AFTER_SECONDS" {}
 variable "EMAIL_FROM" {}
-variable "EXP_IDS"{}
-variable "EXP_POINTS"{}
 variable "GOOGLE_CLIENT_ID" { }
-variable "GROUP_TYPES"{}
 variable "HOST_URL" { default = "http://upgrade-development.us-east-1.elasticbeanstalk.com/api" }
 variable "INTERCEPTORS" { default = "src/api/interceptors/**/*Interceptor.ts" }
 variable "LOG_LEVEL" { default = "debug" }
@@ -127,13 +124,3 @@ variable "TYPEORM_MIGRATIONS_DIR" { default = "src/database/migrations" }
 variable "TYPEORM_SEED" { default = "src/database/seeds/**/*.seed.ts" }
 variable "TYPEORM_SYNCHRONIZE" {}
 variable "TYPEORM_MAX_QUERY_EXECUTION_TIME" { default = 2000 }
-
-
-
-
-
-
-
-
-
-

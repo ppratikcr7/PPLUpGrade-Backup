@@ -2,12 +2,12 @@
 current_directory       = "dev"
 aws_region              = "us-east-1"
 environment             = "development"
-prefix                  = "cli-upgrade" 
+prefix                  = "upgrade" 
 app_version             = "1.0.0"
 
 # RDS related details 
 allocated_storage       = 100
-engine_version          = "11.5"
+engine_version          = "11.10"
 identifier              = "dev-postgres" 
 instance_class          = "db.t2.small"
 storage_type            = "gp2"
