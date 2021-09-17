@@ -23,14 +23,14 @@ jobs:
         with:
           path: backend/packages/Upgrade
       
-      # - name: Generate Changelogs
-      #   run: |
-      #     echo 'SLACK_CHANGELOG<<EOF' >> $GITHUB_ENV
-      #     git log --color=never --pretty='tformat:%xe2%x80%xa2 `%h` %s (%an)' ${{github.event.client_payload.before}}..${{github.event.client_payload.after}} >> $GITHUB_ENV
-      #     echo 'EOF' >> $GITHUB_ENV
-      #     echo 'RELEASE_CHANGELOG<<EOF' >> $GITHUB_ENV
-      #     git log --color=never --pretty=' - %h %s' ${{github.event.client_payload.before}}..${{github.event.client_payload.after}} >> $GITHUB_ENV
-      #     echo 'EOF' >> $GITHUB_ENV
+      - name: Generate Changelogs
+        run: |
+          echo 'SLACK_CHANGELOG<<EOF' >> $GITHUB_ENV
+          git log --color=never --pretty='tformat:%xe2%x80%xa2 `%h` %s (%an)' ${{github.event.client_payload.before}}..${{github.event.client_payload.after}} >> $GITHUB_ENV
+          echo 'EOF' >> $GITHUB_ENV
+          echo 'RELEASE_CHANGELOG<<EOF' >> $GITHUB_ENV
+          git log --color=never --pretty=' - %h %s' ${{github.event.client_payload.before}}..${{github.event.client_payload.after}} >> $GITHUB_ENV
+          echo 'EOF' >> $GITHUB_ENV
 
       #############################################  Build Steps #############################################
       - name: Build
