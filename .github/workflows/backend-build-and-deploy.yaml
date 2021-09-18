@@ -38,7 +38,13 @@ jobs:
         run: |
            npm ci
            zip -qq -r upgrade-backend-v-${{ github.sha }}.zip node_modules packages/Upgrade Dockerfile Dockerrun.aws.json package.json tsconfig.json tslint.json
-       
+      
+      - name: Run chart-releaser
+        uses: helm/chart-releaser-action@v1.1.0
+        env:
+          CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+          APPEND_TO_RELEASE: true
+          
       - name: Create Release
         uses: ncipollo/release-action@v1
         with:
