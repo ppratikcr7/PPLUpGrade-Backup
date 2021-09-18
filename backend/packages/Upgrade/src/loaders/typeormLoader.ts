@@ -30,13 +30,17 @@ export const typeormLoader: MicroframeworkLoader = async (settings: Microframewo
       settings.setData('connection', connection);
       settings.onShutdown(() => connection.close());
     }
-  } catch (error) {
+  } catch (err) {
+    const error = err as any;
     if (error.code === 'ECONNREFUSED') {
-      throw new Error(JSON.stringify({ type: SERVER_ERROR.DB_UNREACHABLE, message: ` : ${error.message}` }));
+      error.type = SERVER_ERROR.DB_UNREACHABLE;
+      throw error;
     } else if (error.code === '42P07') {
-      throw new Error(JSON.stringify({ type: SERVER_ERROR.MIGRATION_ERROR, message: ` : ${error.message}` }));
+      error.type = SERVER_ERROR.MIGRATION_ERROR;
+      throw error;
     } else {
-      throw new Error(JSON.stringify({ type: SERVER_ERROR.DB_AUTH_FAIL, message: ` : ${error.message}` }));
+      error.type = SERVER_ERROR.DB_AUTH_FAIL;
+      throw error;
     }
   }
 };

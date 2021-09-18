@@ -1,3 +1,4 @@
+import { ErrorWithType } from './../errors/ErrorWithType';
 import * as express from 'express';
 import { ExpressMiddlewareInterface } from 'routing-controllers';
 import * as jwt from 'jsonwebtoken';
@@ -7,8 +8,7 @@ import { LoggerInterface, Logger } from '../../decorators/Logger';
 import { SERVER_ERROR } from 'upgrade_types';
 
 export class ScheduleJobMiddleware implements ExpressMiddlewareInterface {
-
-  constructor(@Logger(__filename) private log: LoggerInterface) { }
+  constructor(@Logger(__filename) private log: LoggerInterface) {}
 
   public use(req: express.Request, res: express.Response, next: express.NextFunction): any {
     try {
@@ -16,7 +16,9 @@ export class ScheduleJobMiddleware implements ExpressMiddlewareInterface {
       const token = authorization && authorization.replace('Bearer ', '').trim();
       if (!token) {
         this.log.warn('Token is not present in request header');
-        throw new Error(JSON.stringify({ type: SERVER_ERROR.TOKEN_NOT_PRESENT, message: 'Token is not present in request header' }));
+        const error = new Error('Token is not present in request header');
+        (error as any).type = SERVER_ERROR.TOKEN_NOT_PRESENT;
+        throw error;
       }
       const decodeToken = jwt.verify(token, env.tokenSecretKey);
       delete decodeToken.iat;
@@ -26,11 +28,15 @@ export class ScheduleJobMiddleware implements ExpressMiddlewareInterface {
       if (isequal(decodeToken, req.body)) {
         next();
       } else {
-        throw new Error(JSON.stringify({ type: SERVER_ERROR.INVALID_TOKEN, message: 'Provided token is invalid' }));
+        const error = new Error('Provided token is invalid');
+        (error as any).type = SERVER_ERROR.INVALID_TOKEN;
+        throw error;
       }
-    } catch (error) {
+    } catch (err) {
+      const error = err as ErrorWithType;
       if (error.message === 'jwt expired') {
-        throw new Error(JSON.stringify({ type: SERVER_ERROR.INVALID_TOKEN, message: error.message }));
+        error.type = SERVER_ERROR.INVALID_TOKEN;
+        throw error;
       } else {
         throw new Error(error.message);
       }
