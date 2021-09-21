@@ -57,10 +57,16 @@ export class ExperimentUserService {
 
   public async setAliasesForUser(userId: string, aliases: string[]): Promise<ExperimentUser[]> {
     this.log.info('Set aliases for experiment user => ', userId, aliases);
-    let userExist = await this.getOriginalUserDoc(userId);
+    const userExist = await this.getOriginalUserDoc(userId);
+
+    // throw error if user not defined
     if (!userExist) {
-      // Create experiment user if it does not exist
-      userExist = await this.userRepository.save({ id: userId });
+      throw new Error(
+        JSON.stringify({
+          type: SERVER_ERROR.EXPERIMENT_USER_NOT_DEFINED,
+          message: `User not defined: ${userId}`,
+        })
+      );
     }
     const promiseArray = [];
     aliases.map((aliasId) => {
@@ -103,28 +109,26 @@ export class ExperimentUserService {
           linkedTo: result.originalUser.id,
         };
       });
-      throw new Error(
-        JSON.stringify({
-          type: SERVER_ERROR.QUERY_FAILED,
-          message: `Users already associated with other users ${JSON.stringify(
-            errorToDisplay,
-            null,
-            2
-          )} and cannot be made alias of ${userId}`,
-        })
+      const error = new Error(
+        `Users already associated with other users ${JSON.stringify(
+          errorToDisplay,
+          null,
+          2
+        )} and cannot be made alias of ${userId}`
       );
+      (error as any).type = SERVER_ERROR.QUERY_FAILED;
+      throw error;
     }
     if (otherRootUser.length) {
-      throw new Error(
-        JSON.stringify({
-          type: SERVER_ERROR.QUERY_FAILED,
-          message: `Users with ids ${JSON.stringify(
-            otherRootUser,
-            null,
-            2
-          )} are root user and should not be converted to an alias of ${userId}`,
-        })
+      const error = new Error(
+        `Users with ids ${JSON.stringify(
+          otherRootUser,
+          null,
+          2
+        )} are root user and should not be converted to an alias of ${userId}`
       );
+      (error as any).type = SERVER_ERROR.QUERY_FAILED;
+      throw error;
     }
     const userAliasesDocs = aliasesUserIds.map((aliasId) => {
       const aliasUser: any = {
@@ -152,8 +156,17 @@ export class ExperimentUserService {
     this.log.info('Update working group => ', userId, workingGroup);
     const userExist = await this.getOriginalUserDoc(userId);
 
+    if (!userExist) {
+      throw new Error(
+        JSON.stringify({
+          type: SERVER_ERROR.EXPERIMENT_USER_NOT_DEFINED,
+          message: `User not defined: ${userId}`,
+        })
+      );
+    }
+
     // TODO check if workingGroup is the subset of group membership
-    const newDocument = userExist ? { ...userExist, workingGroup } : { id: userId, workingGroup };
+    const newDocument = { ...userExist, workingGroup };
     return this.userRepository.save(newDocument);
   }
 
@@ -171,12 +184,21 @@ export class ExperimentUserService {
 
     const userExist = await this.getOriginalUserDoc(userId);
 
+    if (!userExist) {
+      throw new Error(
+        JSON.stringify({
+          type: SERVER_ERROR.EXPERIMENT_USER_NOT_DEFINED,
+          message: `User not defined: ${userId}`,
+        })
+      );
+    }
+
     // update assignments
     if (userExist && userExist.group) {
       await this.removeAssignments(userExist.id, groupMembership, userExist.group);
     }
 
-    const newDocument = userExist ? { ...userExist, group: groupMembership } : { id: userId, group: groupMembership };
+    const newDocument = { ...userExist, group: groupMembership };
 
     // update group membership
     return this.userRepository.save(newDocument);
