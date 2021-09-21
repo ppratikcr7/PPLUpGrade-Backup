@@ -12,7 +12,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
         with:
-          ref: ${{ github.event.client_payload.branch || 'main' }}
+          ref: ${{ github.event.client_payload.branch }}
           fetch-depth: 0
       - uses: actions/setup-node@v2
         with:
@@ -120,7 +120,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
         with:
-          ref: ${{ github.event.client_payload.branch || 'main' }}
+          ref: ${{ github.event.client_payload.branch }}
           fetch-depth: 0
       - uses: actions/setup-node@v2
         with:
