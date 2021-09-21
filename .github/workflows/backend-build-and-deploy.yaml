@@ -216,4 +216,76 @@ jobs:
             ${{ secrets.SLACK_FAILURE_PINGS}} *<https://github.com/${{ github.event.repository.full_name }}/releases/tag/${{ github.event.client_payload.tag }}|${{ github.event.client_payload.tag }}> deployment FAILURE*
             <https://github.com/${{ github.event.repository.full_name }}/actions/runs/${{ github.run_id }}|Click here to view the full log>
             ${{ env.SLACK_CHANGELOG }}
-  
+  #############################################  Main ENV #############################################
+  backend-build-deploy-main:
+    name: Backend Build Deploy Development Env Job
+    runs-on: ubuntu-latest
+    if: github.event.client_payload.branch == 'main'
+    environment: main
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          ref: ${{ github.event.client_payload.branch }}
+          fetch-depth: 0
+      - uses: actions/setup-node@v2
+        with:
+          node-version: 12.x
+      - name: Get Package Version
+        uses: martinbeentjes/npm-get-version-action@v1.1.0
+        id: package-version
+        with:
+          path: backend/packages/Upgrade
+      
+      - name: Generate Changelogs
+        run: |
+          echo 'SLACK_CHANGELOG<<EOF' >> $GITHUB_ENV
+          git log --color=never --pretty='tformat:%xe2%x80%xa2 `%h` %s (%an)' ${{github.event.client_payload.before}}..${{github.event.client_payload.after}} >> $GITHUB_ENV
+          echo 'EOF' >> $GITHUB_ENV
+          echo 'RELEASE_CHANGELOG<<EOF' >> $GITHUB_ENV
+          git log --color=never --pretty=' - %h %s' ${{github.event.client_payload.before}}..${{github.event.client_payload.after}} >> $GITHUB_ENV
+          echo 'EOF' >> $GITHUB_ENV
+
+      #############################################  Build Steps #############################################
+      - name: Build
+        working-directory: backend
+        run: |
+           npm ci
+           zip -qq -r ${{ github.event.client_payload.tag }}.zip node_modules packages/Upgrade Dockerfile Dockerrun.aws.json package.json tsconfig.json tslint.json
+          
+      - name: Create Release
+        uses: ncipollo/release-action@v1
+        with:
+          artifacts: backend/${{ github.event.client_payload.tag }}.zip
+          tag: ${{ github.event.client_payload.tag }}
+          name: ${{ github.event.client_payload.tag }}
+          body: ${{ env.RELEASE_CHANGELOG }}
+          commit: main
+          token: ${{ secrets.GITHUB_TOKEN }}
+       
+      - name: Trigger Deployment Workflow
+        uses: peter-evans/repository-dispatch@v1
+        with:
+          token: ${{ secrets.REPO_DISPATCH_TOKEN }}
+          repository: ${{ github.repository }}
+          event-type: trigger-backend-deployment
+          client-payload: '{"tag": "${{ github.event.client_payload.tag }}"}'
+
+      - name: Success Slack Message
+        uses: aibexhq/slack-rich-notify@v2.0.1
+        with:
+          token: ${{ secrets.SLACK_TOKEN }}
+          channel: ${{ secrets.SLACK_BUILD_CHANNEL }}
+          message: |
+            *<https://github.com/${{ github.event.repository.full_name }}/releases/tag/${{ github.event.client_payload.tag }}|${{ github.event.client_payload.tag }}> build was successful*
+            ${{ env.SLACK_CHANGELOG }}
+
+      - name: Failure Slack Message
+        uses: aibexhq/slack-rich-notify@v2.0.1
+        if: failure()
+        with:
+          token: ${{ secrets.SLACK_TOKEN }}
+          channel: ${{ secrets.SLACK_BUILD_CHANNEL }}
+          message: |
+            ${{ secrets.SLACK_FAILURE_PINGS}} *${{ github.event.client_payload.tag }} build FAILURE*
+            <https://github.com/${{ github.event.repository.full_name }}/actions/runs/${{ github.run_id }}|Click here to view the full log>
+            ${{ env.SLACK_CHANGELOG }}

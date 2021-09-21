@@ -206,3 +206,74 @@ jobs:
             ${{ secrets.SLACK_FAILURE_PINGS}} *<https://github.com/${{ github.event.repository.full_name }}/releases/tag/${{ github.event.client_payload.tag }}|${{ github.event.client_payload.tag }}> deployment FAILURE*
             <https://github.com/${{ github.event.repository.full_name }}/actions/runs/${{ github.run_id }}|Click here to view the full log>
             ${{ env.SLACK_CHANGELOG }}
+
+  #############################################  MAIN ENV #############################################
+  frontend-build-and-deploy-main:
+    name: 'Frontend Build and Deploy main'
+    runs-on: ubuntu-latest
+    if: github.event.client_payload.branch == 'main'
+    environment: main
+    steps:
+      - uses: 'actions/checkout@v2'
+        with:
+          ref: ${{ github.event.client_payload.branch }}
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v2
+        with:
+          node-version: 12.x
+
+      - uses: martinbeentjes/npm-get-version-action@v1.1.0
+        id: package-version
+        with:
+          path: frontend
+
+      - name: Generate Changelogs
+        run: |
+          echo 'SLACK_CHANGELOG<<EOF' >> $GITHUB_ENV
+          git log --color=never --pretty='tformat:%xe2%x80%xa2 `%h` %s (%an)' ${{github.event.client_payload.before}}..${{github.event.client_payload.after}} >> $GITHUB_ENV
+          echo 'EOF' >> $GITHUB_ENV
+          echo 'RELEASE_CHANGELOG<<EOF' >> $GITHUB_ENV
+          git log --color=never --pretty=' - %h %s' ${{github.event.client_payload.before}}..${{github.event.client_payload.after}} >> $GITHUB_ENV
+          echo 'EOF' >> $GITHUB_ENV
+
+#############################################  Build Steps #############################################
+
+      - run: |
+          npm ci
+          npm run build:prod
+        working-directory: frontend
+
+      - run: zip -r ${{ github.event.client_payload.tag }}.zip *
+        working-directory: frontend/dist/abtesting
+
+      - name: Create Release
+        uses: ncipollo/release-action@v1
+        with:
+          artifacts: frontend/dist/abtesting/${{ github.event.client_payload.tag }}.zip
+          allowUpdates: true
+          tag: ${{ github.event.client_payload.tag }}
+          name: ${{ github.event.client_payload.tag }}
+          body: ${{ env.RELEASE_CHANGELOG }}
+          commit: main
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Success Build Message
+        uses: aibexhq/slack-rich-notify@v2.0.1
+        with:
+          token: ${{ secrets.SLACK_TOKEN }}
+          channel: ${{ secrets.SLACK_BUILD_CHANNEL }}
+          message: |
+            *<https://github.com/${{ github.event.repository.full_name }}/releases/tag/${{ github.event.client_payload.tag }}|${{ github.event.client_payload.tag }}> build was successful*
+            ${{ env.SLACK_CHANGELOG }}
+
+      - name: Failure Build Message
+        uses: aibexhq/slack-rich-notify@v2.0.1
+        if: failure()
+        with:
+          token: ${{ secrets.SLACK_TOKEN }}
+          channel: ${{ secrets.SLACK_BUILD_CHANNEL }}
+          message: |
+            ${{ secrets.SLACK_FAILURE_PINGS}} *${{ github.event.client_payload.tag }} build FAILURE*
+            <https://github.com/${{ github.event.repository.full_name }}/actions/runs/${{ github.run_id }}|Click here to view the full log>
+            ${{ env.SLACK_CHANGELOG }}
