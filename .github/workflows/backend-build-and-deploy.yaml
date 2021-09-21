@@ -217,11 +217,11 @@ jobs:
             <https://github.com/${{ github.event.repository.full_name }}/actions/runs/${{ github.run_id }}|Click here to view the full log>
             ${{ env.SLACK_CHANGELOG }}
   #############################################  Main ENV #############################################
-  backend-build-deploy-main:
-    name: Backend Build Deploy Development Env Job
+  backend-build-main:
+    name: Backend Build Main repo Job
     runs-on: ubuntu-latest
     if: github.event.client_payload.branch == 'main'
-    environment: main
+    environment: development
     steps:
       - uses: actions/checkout@v2
         with:

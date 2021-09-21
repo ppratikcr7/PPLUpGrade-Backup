@@ -208,8 +208,8 @@ jobs:
             ${{ env.SLACK_CHANGELOG }}
 
   #############################################  MAIN ENV #############################################
-  frontend-build-and-deploy-main:
-    name: 'Frontend Build and Deploy main'
+  frontend-build-main:
+    name: 'Frontend Build main'
     runs-on: ubuntu-latest
     if: github.event.client_payload.branch == 'main'
     environment: main
