@@ -41,12 +41,12 @@ jobs:
         working-directory: frontend
 
       - run: zip -r ${{ github.event.client_payload.tag }}.zip *
-        working-directory: frontend/dist/abtesting
+        working-directory: frontend/dist/upgrade
 
       - name: Create Release
         uses: ncipollo/release-action@v1
         with:
-          artifacts: frontend/dist/abtesting/${{ github.event.client_payload.tag }}.zip
+          artifacts: frontend/dist/upgrade/${{ github.event.client_payload.tag }}.zip
           allowUpdates: true
           tag: ${{ github.event.client_payload.tag }}
           name: ${{ github.event.client_payload.tag }}
@@ -84,7 +84,7 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_S3_BUCKET: ${{ secrets.S3_BUCKET }}
           use_existing_version_if_available: true
-          SOURCE_DIR: frontend/dist/abtesting
+          SOURCE_DIR: frontend/dist/upgrade
 
       - name: Success Deploy Message
         uses: aibexhq/slack-rich-notify@v2.0.1
@@ -143,12 +143,12 @@ jobs:
         working-directory: frontend
 
       - run: zip -r ${{ github.event.client_payload.tag }}.zip *
-        working-directory: frontend/dist/abtesting
+        working-directory: frontend/dist/upgrade
 
       - name: Create Release
         uses: ncipollo/release-action@v1
         with:
-          artifacts: frontend/dist/abtesting/${{ github.event.client_payload.tag }}.zip
+          artifacts: frontend/dist/upgrade/${{ github.event.client_payload.tag }}.zip
           tag: ${{ github.event.client_payload.tag }}
           name: ${{ github.event.client_payload.tag }}
           body: ${{ env.RELEASE_CHANGELOG }}
@@ -185,7 +185,7 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_S3_BUCKET: ${{ secrets.S3_BUCKET }}
           use_existing_version_if_available: true
-          SOURCE_DIR: frontend/dist/abtesting
+          SOURCE_DIR: frontend/dist/upgrade
 
       - name: Success Deploy Message
         uses: aibexhq/slack-rich-notify@v2.0.1
@@ -245,12 +245,12 @@ jobs:
         working-directory: frontend
 
       - run: zip -r ${{ github.event.client_payload.tag }}.zip *
-        working-directory: frontend/dist/abtesting
+        working-directory: frontend/dist/upgrade
 
       - name: Create Release
         uses: ncipollo/release-action@v1
         with:
-          artifacts: frontend/dist/abtesting/${{ github.event.client_payload.tag }}.zip
+          artifacts: frontend/dist/upgrade/${{ github.event.client_payload.tag }}.zip
           allowUpdates: true
           tag: ${{ github.event.client_payload.tag }}
           name: ${{ github.event.client_payload.tag }}
