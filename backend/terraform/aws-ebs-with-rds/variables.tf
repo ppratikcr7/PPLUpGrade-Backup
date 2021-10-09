@@ -86,6 +86,7 @@ variable "AUTH_CHECK" {}
 variable "AWS_REGION" { default = "us-east-1" }
 variable "CLIENT_API_KEY"{}
 variable "CLIENT_API_SECRET"{}
+variable "CONTEXT_METADATA" {}
 variable "CONTROLLERS" { default = "src/api/controllers/**/*Controller.ts" }
 variable "DOMAIN_NAME" { default = "" }
 variable "EMAIL_BUCKET" {}

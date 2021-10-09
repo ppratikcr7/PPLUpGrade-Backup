@@ -169,6 +169,11 @@ resource "aws_elastic_beanstalk_environment" "upgrade-app-prod" {
   }
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
+    name      = "CONTEXT_METADATA"
+    value     = var.CONTEXT_METADATA
+  }
+  setting {
+    namespace = "aws:elasticbeanstalk:application:environment"
     name      = "CONTROLLERS"
     value     = var.CONTROLLERS
   }
