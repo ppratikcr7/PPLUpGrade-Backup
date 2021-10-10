@@ -4,6 +4,7 @@ variable "aws_region"{}
 variable "environment"{}
 variable "prefix"{}
 variable "app_version"{}
+variable "aws_profile"{}
 
 # RDS related details 
 variable "allocated_storage"{}

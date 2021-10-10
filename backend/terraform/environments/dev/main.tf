@@ -13,7 +13,6 @@ terraform {
 
 provider "aws" {
   region = var.aws_region
-  profile = var.aws_profile
 }
 
 
@@ -27,8 +26,8 @@ module "aws_lambda_function" {
 
   environment           = var.environment 
   prefix                = var.prefix 
-  app_version           = var.app_version 
-  output_path           = "../environments/${var.current_directory}/.terraform" 
+  app_version           = var.app_version  
+  output_path           = "../environments/${var.current_directory}/.terraform"  
   function_name         = "Schedule" 
   function_handler      = "schedule.schedule"
   runtime               =  "nodejs10.x"
@@ -39,6 +38,7 @@ module "aws_lambda_function" {
 output "lambda"{
   value = module.aws_lambda_function.lambda-arn
 }
+
 
 module "aws-state-machine" {
 
@@ -85,28 +85,28 @@ module "aws-ebs-app" {
   ssl_certificate_id    = var.ssl_certificate_id
 
   /* APP env config*/
-  GOOGLE_CLIENT_ID      = var.GOOGLE_CLIENT_ID
-  CLIENT_API_KEY             = var.CLIENT_API_KEY
-  CLIENT_API_SECRET     = var.CLIENT_API_SECRET
-  MONITOR_PASSWORD      = var.MONITOR_PASSWORD  
-  SWAGGER_PASSWORD      = var.SWAGGER_PASSWORD 
-  AUTH_CHECK            = var.AUTH_CHECK
-  TOKEN_SECRET_KEY      = var.TOKEN_SECRET_KEY 
-  TYPEORM_SYNCHRONIZE   = var.TYPEORM_SYNCHRONIZE
+  ADMIN_USERS                      = var.ADMIN_USERS
+  AUTH_CHECK                       = var.AUTH_CHECK
+  CLIENT_API_KEY                   = var.CLIENT_API_KEY
+  CLIENT_API_SECRET                = var.CLIENT_API_SECRET
+  CONTEXT_METADATA                 = var.CONTEXT_METADATA
+  DOMAIN_NAME                      = var.DOMAIN_NAME
+  EMAIL_BUCKET                     = module.aws-email-bucket.s3-bucket
+  EMAIL_EXPIRE_AFTER_SECONDS       = var.EMAIL_EXPIRE_AFTER_SECONDS
+  EMAIL_FROM                       = var.EMAIL_FROM
+  GOOGLE_CLIENT_ID                 = var.GOOGLE_CLIENT_ID
+  MONITOR_PASSWORD                 = var.MONITOR_PASSWORD
+  NEW_RELIC_APP_NAME               = var.NEW_RELIC_APP_NAME
+  NEW_RELIC_LICENSE_KEY            = var.NEW_RELIC_LICENSE_KEY
+  RDS_PASSWORD                     = var.RDS_PASSWORD
+  SCHEDULER_STEP_FUNCTION          = module.aws-state-machine.step_function_arn
+  SWAGGER_PASSWORD                 = var.SWAGGER_PASSWORD 
+  TOKEN_SECRET_KEY                 = var.TOKEN_SECRET_KEY 
+  TYPEORM_SYNCHRONIZE              = var.TYPEORM_SYNCHRONIZE
   TYPEORM_MAX_QUERY_EXECUTION_TIME = var.TYPEORM_MAX_QUERY_EXECUTION_TIME
-  ADMIN_USERS           = var.ADMIN_USERS
-  RDS_PASSWORD          = var.RDS_PASSWORD
-  CONTEXT_METADATA      = var.CONTEXT_METADATA
-  NEW_RELIC_LICENSE_KEY      = var.NEW_RELIC_LICENSE_KEY
 
-  SCHEDULER_STEP_FUNCTION = module.aws-state-machine.step_function_arn
   PATH_TO_PRIVATE_KEY     = "~/.ssh/id_rsa"
   PATH_TO_PUBLIC_KEY      = "~/.ssh/id_rsa.pub"
-  DOMAIN_NAME             = var.DOMAIN_NAME
-
-  EMAIL_FROM                      = var.EMAIL_FROM
-  EMAIL_EXPIRE_AFTER_SECONDS      = var.EMAIL_EXPIRE_AFTER_SECONDS
-  EMAIL_BUCKET                    = module.aws-email-bucket.s3-bucket
 }
 
 resource "null_resource" "update-ebs-env" { 
