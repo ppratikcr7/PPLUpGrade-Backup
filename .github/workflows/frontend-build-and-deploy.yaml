@@ -40,13 +40,15 @@ jobs:
           npm install
           npm run build
 
-      - run: |
-          npm ci
-          npm run build:dev
+      - name: Build Frontend
         working-directory: frontend
-
-      - run: zip -r upgrade-frontend-v-${{ github.sha}}.zip *
+        run: |
+            npm ci
+            npm run build:dev
+          
+      - name: Zip
         working-directory: frontend/dist/upgrade
+        run: zip -r upgrade-frontend-v-${{ github.sha}}.zip *
 
       - name: Create Release
         uses: ncipollo/release-action@v1
