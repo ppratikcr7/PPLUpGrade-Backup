@@ -34,14 +34,15 @@ jobs:
           echo 'EOF' >> $GITHUB_ENV
 
 #############################################  Build Steps #############################################
-
-      - run: |
-          npm ci
-          npm run build:dev
+      - name: Build Frontend
         working-directory: frontend
-
-      - run: zip -r ${{ github.event.client_payload.tag }}.zip *
+        run: |
+            npm ci
+            npm run build:dev
+          
+      - name: Zip
         working-directory: frontend/dist/upgrade
+        run: zip -r ${{ github.event.client_payload.tag }}.zip *
 
       - name: Create Release
         uses: ncipollo/release-action@v1
