@@ -42,8 +42,8 @@ jobs:
       - name: Build backend
         working-directory: backend
         run: |
-          cd packages/Upgrade && npm ci
           npm run build:upgrade
+          cd packages/Upgrade && npm ci
           zip -qq -r ${{ github.event.client_payload.tag }}.zip node_modules packages/Upgrade Dockerfile Dockerrun.aws.json package.json tsconfig.json tslint.json
           
       - name: Create Release
@@ -156,8 +156,8 @@ jobs:
       - name: Build backend
         working-directory: backend
         run: |
-          cd packages/Upgrade && npm ci
           npm run build:upgrade
+          cd packages/Upgrade && npm ci
           zip -qq -r ${{ github.event.client_payload.tag }}.zip node_modules packages/Upgrade Dockerfile Dockerrun.aws.json package.json tsconfig.json tslint.json
        
       - name: Create Release
@@ -269,8 +269,8 @@ jobs:
       - name: Build backend
         working-directory: backend
         run: |
-          cd packages/Upgrade && npm ci
           npm run build:upgrade
+          cd packages/Upgrade && npm ci
           zip -qq -r ${{ github.event.client_payload.tag }}.zip node_modules packages/Upgrade Dockerfile Dockerrun.aws.json package.json tsconfig.json tslint.json
           
       - name: Create Release
