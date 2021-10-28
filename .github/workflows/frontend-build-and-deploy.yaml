@@ -34,12 +34,6 @@ jobs:
           echo 'EOF' >> $GITHUB_ENV
 
 #############################################  Build Steps #############################################
-      - name: Build types
-        working-directory: types
-        run: |
-          npm install
-          npm run build
-
       - name: Build Frontend
         working-directory: frontend
         run: |
@@ -144,14 +138,16 @@ jobs:
           echo 'EOF' >> $GITHUB_ENV
 
 #############################################  Build Steps #############################################
-      - run: |
+      - name: Build Frontend
+        working-directory: frontend
+        run: |
           npm ci
           npm run build:bsnl
-        working-directory: frontend
-
-      - run: zip -r ${{ github.event.client_payload.tag }}.zip *
+        
+      - name: Zip
         working-directory: frontend/dist/upgrade
-
+        run: zip -r ${{ github.event.client_payload.tag }}.zip *
+        
       - name: Create Release
         uses: ncipollo/release-action@v1
         with:
@@ -246,14 +242,16 @@ jobs:
 
 #############################################  Build Steps #############################################
 
-      - run: |
+      - name: Build frontend
+        working-directory: frontend
+        run: |
           npm ci
           npm run build:prod
-        working-directory: frontend
-
-      - run: zip -r ${{ github.event.client_payload.tag }}.zip *
+        
+      - name: Zip
         working-directory: frontend/dist/upgrade
-
+        run: zip -r ${{ github.event.client_payload.tag }}.zip *
+        
       - name: Create Release
         uses: ncipollo/release-action@v1
         with:
