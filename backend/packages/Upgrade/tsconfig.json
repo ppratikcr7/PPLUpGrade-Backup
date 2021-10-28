@@ -6,10 +6,7 @@
     "pretty": true
   },
   "compilerOptions": {
-    "rootDir": ".",
-    "paths": {
-      "upgrade_types": ["../../../types"]
-    }
+    "rootDir": "."
   },
   "exclude": [
     "**/*/node_modules",

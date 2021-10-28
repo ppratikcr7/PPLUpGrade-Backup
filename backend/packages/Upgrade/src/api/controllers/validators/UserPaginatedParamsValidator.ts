@@ -1,5 +1,5 @@
 import { IsNotEmpty, IsDefined, IsNumber } from 'class-validator';
-import { EXPERIMENT_SORT_AS } from 'upgrade_types';
+import { SORT_AS } from 'packages/Upgrade/src/types';
 
 // TODO: Move to upgrade types
 export interface IUserSearchParams {
@@ -8,7 +8,7 @@ export interface IUserSearchParams {
 }
 export interface IUserSortParams {
   key: USER_SEARCH_SORT_KEY;
-  sortAs: EXPERIMENT_SORT_AS;
+  sortAs: SORT_AS;
 }
 
 export enum USER_SEARCH_SORT_KEY {
