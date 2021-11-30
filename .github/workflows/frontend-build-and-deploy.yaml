@@ -12,6 +12,7 @@ jobs:
     steps:
       - uses: 'actions/checkout@v2'
         with:
+          ref: ${{ github.event.client_payload.branch }}
           fetch-depth: 0
 
       - uses: actions/setup-node@v2
@@ -33,21 +34,23 @@ jobs:
           echo 'EOF' >> $GITHUB_ENV
 
 #############################################  Build Steps #############################################
-
-      - run: |
-          npm ci
-          npm run build:dev
+      - name: Build Frontend
         working-directory: frontend
-
-      - run: zip -r upgrade-frontend-v-${{ github.sha}}.zip *
+        run: |
+            npm ci
+            npm run build:dev
+          
+      - name: Zip
         working-directory: frontend/dist/upgrade
+        run: zip -r ${{ github.event.client_payload.tag }}.zip *
 
       - name: Create Release
         uses: ncipollo/release-action@v1
         with:
-          artifacts: frontend/dist/upgrade/upgrade-frontend-v-${{ github.sha}}.zip
-          tag: upgrade-frontend-v-${{ github.sha }}
-          name: Upgrade Frontend ${{ github.sha }}
+          artifacts: frontend/dist/upgrade/${{ github.event.client_payload.tag }}.zip
+          allowUpdates: true
+          tag: ${{ github.event.client_payload.tag }}
+          name: ${{ github.event.client_payload.tag }}
           body: ${{ env.RELEASE_CHANGELOG }}
           commit: main
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -58,7 +61,7 @@ jobs:
           token: ${{ secrets.SLACK_TOKEN }}
           channel: ${{ secrets.SLACK_BUILD_CHANNEL }}
           message: |
-            *<https://github.com/${{ github.event.repository.full_name }}/releases/tag/v${{ github.sha }}|UpGrade Frontend V-${{ github.sha }}> build was successful*
+            *<https://github.com/${{ github.event.repository.full_name }}/releases/tag/${{ github.event.client_payload.tag }}|${{ github.event.client_payload.tag }}> build was successful*
             ${{ env.SLACK_CHANGELOG }}
 
       - name: Failure Build Message
@@ -68,7 +71,7 @@ jobs:
           token: ${{ secrets.SLACK_TOKEN }}
           channel: ${{ secrets.SLACK_BUILD_CHANNEL }}
           message: |
-            ${{ secrets.SLACK_FAILURE_PINGS}} *UpGrade Frontend V-${{ github.sha }} build FAILURE*
+            ${{ secrets.SLACK_FAILURE_PINGS}} *${{ github.event.client_payload.tag }} build FAILURE*
             <https://github.com/${{ github.event.repository.full_name }}/actions/runs/${{ github.run_id }}|Click here to view the full log>
             ${{ env.SLACK_CHANGELOG }}
 
@@ -84,13 +87,16 @@ jobs:
           use_existing_version_if_available: true
           SOURCE_DIR: frontend/dist/upgrade
 
+      - run: zip -r upgrade-frontend-v${{ steps.package-version.outputs.current-version}}.zip *
+        working-directory: frontend/dist/upgrade
+
       - name: Success Deploy Message
         uses: aibexhq/slack-rich-notify@v2.0.1
         with:
           token: ${{ secrets.SLACK_TOKEN }}
           channel: ${{ secrets.SLACK_DEPLOY_CHANNEL }}
           message: |
-            *<https://github.com/${{ github.event.repository.full_name }}/releases/tag/v-${{ github.sha }}|UpGrade Frontend V-${{ github.sha }}>* has been deployed to the `development` environment at ${{ secrets.ENV_FRONTEND_URL }}
+            *<https://github.com/${{ github.event.repository.full_name }}/releases/tag/${{ github.event.client_payload.tag }}|${{ github.event.client_payload.tag }}>* has been deployed to the `development` environment at ${{ secrets.ENV_FRONTEND_URL }}
             ${{ env.SLACK_CHANGELOG }}
 
       - name: Failure Deploy Message
@@ -100,7 +106,7 @@ jobs:
           token: ${{ secrets.SLACK_TOKEN }}
           channel: ${{ secrets.SLACK_DEPLOY_CHANNEL }}
           message: |
-            ${{ secrets.SLACK_FAILURE_PINGS}} *<https://github.com/${{ github.event.repository.full_name }}/releases/tag/v-${{ github.sha }}|UpGrade Frontend V-${{ github.sha }}> deployment FAILURE*
+            ${{ secrets.SLACK_FAILURE_PINGS}} *<https://github.com/${{ github.event.repository.full_name }}/releases/tag/${{ github.event.client_payload.tag }}|${{ github.event.client_payload.tag }}> deployment FAILURE*
             <https://github.com/${{ github.event.repository.full_name }}/actions/runs/${{ github.run_id }}|Click here to view the full log>
             ${{ env.SLACK_CHANGELOG }}
 
@@ -113,6 +119,7 @@ jobs:
     steps:
       - uses: 'actions/checkout@v2'
         with:
+          ref: ${{ github.event.client_payload.branch }}
           fetch-depth: 0
 
       - uses: actions/setup-node@v2
@@ -134,20 +141,22 @@ jobs:
           echo 'EOF' >> $GITHUB_ENV
 
 #############################################  Build Steps #############################################
-      - run: |
+      - name: Build Frontend
+        working-directory: frontend
+        run: |
           npm ci
           npm run build:bsnl
-        working-directory: frontend
-
-      - run: zip -r upgrade-frontend-v-${{ github.sha}}.zip *
+        
+      - name: Zip
         working-directory: frontend/dist/upgrade
-
+        run: zip -r ${{ github.event.client_payload.tag }}.zip *
+        
       - name: Create Release
         uses: ncipollo/release-action@v1
         with:
-          artifacts: frontend/dist/upgrade/upgrade-frontend-v-${{ github.sha}}.zip
-          tag: upgrade-frontend-v-${{ github.sha }}
-          name: Upgrade Frontend ${{ github.sha }}
+          artifacts: frontend/dist/upgrade/${{ github.event.client_payload.tag }}.zip
+          tag: ${{ github.event.client_payload.tag }}
+          name: ${{ github.event.client_payload.tag }}
           body: ${{ env.RELEASE_CHANGELOG }}
           commit: main
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -158,7 +167,7 @@ jobs:
           token: ${{ secrets.SLACK_TOKEN }}
           channel: ${{ secrets.SLACK_BUILD_CHANNEL }}
           message: |
-            *<https://github.com/${{ github.event.repository.full_name }}/releases/tag/v-${{ github.sha }}|UpGrade Frontend V-${{ github.sha }}> build was successful*
+            *<https://github.com/${{ github.event.repository.full_name }}/releases/tag/${{ github.event.client_payload.tag }}|${{ github.event.client_payload.tag }}> build was successful*
             ${{ env.SLACK_CHANGELOG }}
 
       - name: Failure Build Message
@@ -168,7 +177,7 @@ jobs:
           token: ${{ secrets.SLACK_TOKEN }}
           channel: ${{ secrets.SLACK_BUILD_CHANNEL }}
           message: |
-            ${{ secrets.SLACK_FAILURE_PINGS}} *UpGrade Frontend V-${{ github.sha }} build FAILURE*
+            ${{ secrets.SLACK_FAILURE_PINGS}} *${{ github.event.client_payload.tag }} build FAILURE*
             <https://github.com/${{ github.event.repository.full_name }}/actions/runs/${{ github.run_id }}|Click here to view the full log>
             ${{ env.SLACK_CHANGELOG }}
 
@@ -190,7 +199,7 @@ jobs:
           token: ${{ secrets.SLACK_TOKEN }}
           channel: ${{ secrets.SLACK_DEPLOY_CHANNEL }}
           message: |
-            *<https://github.com/${{ github.event.repository.full_name }}/releases/tag/v-${{ github.sha }}|UpGrade Frontend V-${{ github.sha }}>* has been deployed to the `BSNL` environment at ${{ secrets.ENV_FRONTEND_URL }}
+            *<https://github.com/${{ github.event.repository.full_name }}/releases/tag/${{ github.event.client_payload.tag }}|${{ github.event.client_payload.tag }}>* has been deployed to the `BSNL` environment at ${{ secrets.ENV_FRONTEND_URL }}
             ${{ env.SLACK_CHANGELOG }}
 
       - name: Failure Deploy Message
@@ -200,6 +209,79 @@ jobs:
           token: ${{ secrets.SLACK_TOKEN }}
           channel: ${{ secrets.SLACK_DEPLOY_CHANNEL }}
           message: |
-            ${{ secrets.SLACK_FAILURE_PINGS}} *<https://github.com/${{ github.event.repository.full_name }}/releases/tag/v-${{ github.sha }}|UpGrade Frontend V-${{ github.sha }}> deployment FAILURE*
+            ${{ secrets.SLACK_FAILURE_PINGS}} *<https://github.com/${{ github.event.repository.full_name }}/releases/tag/${{ github.event.client_payload.tag }}|${{ github.event.client_payload.tag }}> deployment FAILURE*
+            <https://github.com/${{ github.event.repository.full_name }}/actions/runs/${{ github.run_id }}|Click here to view the full log>
+            ${{ env.SLACK_CHANGELOG }}
+
+  #############################################  MAIN ENV #############################################
+  frontend-build-main:
+    name: 'Frontend Build main'
+    runs-on: ubuntu-latest
+    if: github.event.client_payload.branch == 'main'
+    environment: main
+    steps:
+      - uses: 'actions/checkout@v2'
+        with:
+          ref: ${{ github.event.client_payload.branch }}
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v2
+        with:
+          node-version: 12.x
+
+      - uses: martinbeentjes/npm-get-version-action@v1.1.0
+        id: package-version
+        with:
+          path: frontend
+
+      - name: Generate Changelogs
+        run: |
+          echo 'SLACK_CHANGELOG<<EOF' >> $GITHUB_ENV
+          git log --color=never --pretty='tformat:%xe2%x80%xa2 `%h` %s (%an)' ${{github.event.client_payload.before}}..${{github.event.client_payload.after}} >> $GITHUB_ENV
+          echo 'EOF' >> $GITHUB_ENV
+          echo 'RELEASE_CHANGELOG<<EOF' >> $GITHUB_ENV
+          git log --color=never --pretty=' - %h %s' ${{github.event.client_payload.before}}..${{github.event.client_payload.after}} >> $GITHUB_ENV
+          echo 'EOF' >> $GITHUB_ENV
+
+#############################################  Build Steps #############################################
+
+      - name: Build frontend
+        working-directory: frontend
+        run: |
+          npm ci
+          npm run build:prod
+        
+      - name: Zip
+        working-directory: frontend/dist/upgrade
+        run: zip -r ${{ github.event.client_payload.tag }}.zip *
+        
+      - name: Create Release
+        uses: ncipollo/release-action@v1
+        with:
+          artifacts: frontend/dist/upgrade/${{ github.event.client_payload.tag }}.zip
+          allowUpdates: true
+          tag: ${{ github.event.client_payload.tag }}
+          name: ${{ github.event.client_payload.tag }}
+          body: ${{ env.RELEASE_CHANGELOG }}
+          commit: main
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Success Build Message
+        uses: aibexhq/slack-rich-notify@v2.0.1
+        with:
+          token: ${{ secrets.SLACK_TOKEN }}
+          channel: ${{ secrets.SLACK_BUILD_CHANNEL }}
+          message: |
+            *<https://github.com/${{ github.event.repository.full_name }}/releases/tag/${{ github.event.client_payload.tag }}|${{ github.event.client_payload.tag }}> build was successful*
+            ${{ env.SLACK_CHANGELOG }}
+
+      - name: Failure Build Message
+        uses: aibexhq/slack-rich-notify@v2.0.1
+        if: failure()
+        with:
+          token: ${{ secrets.SLACK_TOKEN }}
+          channel: ${{ secrets.SLACK_BUILD_CHANNEL }}
+          message: |
+            ${{ secrets.SLACK_FAILURE_PINGS}} *${{ github.event.client_payload.tag }} build FAILURE*
             <https://github.com/${{ github.event.repository.full_name }}/actions/runs/${{ github.run_id }}|Click here to view the full log>
             ${{ env.SLACK_CHANGELOG }}

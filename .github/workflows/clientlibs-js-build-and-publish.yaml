@@ -2,7 +2,7 @@ name: Clientlibs-js Build and Publish
 on:
   push:
     branches:
-      - main
+      - no_branch
     paths-ignore:
       - 'backend/**'
       - 'clientlibs/java/**'
@@ -18,7 +18,7 @@ on:
 jobs:
   build-and-publish:
     runs-on: ubuntu-latest
-    if: github.repository_owner == 'CarnegieLearningWeb'
+    if: github.repository_owner == 'Playpowerlabs'
     defaults:
       run:
         working-directory: clientlibs/js

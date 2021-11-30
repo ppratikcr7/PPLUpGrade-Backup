@@ -1,3 +1,4 @@
+import { UpgradeLogger } from './../../lib/logger/UpgradeLogger';
 import { Service } from 'typedi';
 import { OrmRepository } from 'typeorm-typedi-extensions';
 import { ExperimentUserRepository } from '../repositories/ExperimentUserRepository';
@@ -7,7 +8,7 @@ import uuid from 'uuid/v4';
 import { ExperimentRepository } from '../repositories/ExperimentRepository';
 import { ASSIGNMENT_UNIT, CONSISTENCY_RULE, EXPERIMENT_STATE, SERVER_ERROR } from 'upgrade_types';
 import { IndividualAssignmentRepository } from '../repositories/IndividualAssignmentRepository';
-import { In, Not } from 'typeorm';
+import { getConnection, In, Not } from 'typeorm';
 import { IndividualExclusionRepository } from '../repositories/IndividualExclusionRepository';
 import { GroupExclusionRepository } from '../repositories/GroupExclusionRepository';
 import { Experiment } from '../models/Experiment';
@@ -33,8 +34,9 @@ export class ExperimentUserService {
     return this.userRepository.findOne({ id });
   }
 
-  public async create(users: Array<Partial<ExperimentUser>>): Promise<ExperimentUser[]> {
-    this.log.info('Create a new user => ', users.toString());
+  public async create(users: Array<Partial<ExperimentUser>>, logger: UpgradeLogger): Promise<ExperimentUser[]> {
+    logger.addFromDetails(__filename, 'create');
+    logger.info({ stdout: 'Create a new User. Metadata of the user =>', details: users, stack_trace: null });
     const multipleUsers = users.map((user) => {
       user.id = user.id || uuid();
       return user;
@@ -52,7 +54,11 @@ export class ExperimentUserService {
 
     // wait for all assignment update to get complete
     await Promise.all(assignmentUpdated);
-    return updatedUsers;
+
+    // findAll user document here
+    const updatedUserDocument = await this.userRepository.findByIds(updatedUsers.map((user) => user.id));
+
+    return updatedUserDocument;
   }
 
   public async setAliasesForUser(userId: string, aliases: string[]): Promise<ExperimentUser[]> {
@@ -362,5 +368,12 @@ export class ExperimentUserService {
     if (assignedExperimentIds.length > 0) {
       await this.individualAssignmentRepository.deleteExperimentsForUserId(userId, assignedExperimentIds);
     }
+  }
+
+  public async clearDB(): Promise<string> {
+    await getConnection().transaction(async (transactionalEntityManager) => {
+      await this.experimentRepository.clearDB(transactionalEntityManager);
+    });
+    return Promise.resolve('Cleared DB');
   }
 }

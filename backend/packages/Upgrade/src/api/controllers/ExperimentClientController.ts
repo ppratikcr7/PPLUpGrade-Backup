@@ -1,4 +1,4 @@
-import { JsonController, Post, Body, UseBefore, Get, BodyParam, Req } from 'routing-controllers';
+import { JsonController, Post, Body, UseBefore, Get, BodyParam, Req, InternalServerError, Delete } from 'routing-controllers';
 import { ExperimentService } from '../services/ExperimentService';
 import { ExperimentAssignmentService } from '../services/ExperimentAssignmentService';
 import { MarkExperimentValidator } from './validators/MarkExperimentValidator';
@@ -7,7 +7,7 @@ import { ExperimentUser } from '../models/ExperimentUser';
 import { ExperimentUserService } from '../services/ExperimentUserService';
 import { UpdateWorkingGroupValidator } from './validators/UpdateWorkingGroupValidator';
 import { MonitoredExperimentPoint } from '../models/MonitoredExperimentPoint';
-import { IExperimentAssignment, ISingleMetric, IGroupMetric } from 'upgrade_types';
+import { IExperimentAssignment, ISingleMetric, IGroupMetric, SERVER_ERROR } from 'upgrade_types';
 import { FailedParamsValidator } from './validators/FailedParamsValidator';
 import { ExperimentError } from '../models/ExperimentError';
 import { FeatureFlag } from '../models/FeatureFlag';
@@ -19,6 +19,8 @@ import { MetricService } from '../services/MetricService';
 import { ExperimentUserAliasesValidator } from './validators/ExperimentUserAliasesValidator';
 import { Metric } from '../models/Metric';
 import * as express from 'express';
+import { AppRequest } from '../../types';
+import { env } from '../../env';
 
 /**
  * @swagger
@@ -124,11 +126,25 @@ export class ExperimentClientController {
   @Post('init')
   public async init(
     @Body({ validate: { validationError: { target: false, value: false } } })
+    @Req()
+    request: AppRequest,
     experimentUser: ExperimentUser
-  ): Promise<ExperimentUser> {
-    const document = await this.experimentUserService.create([experimentUser]);
-    return document[0];
-  }
+  ): Promise<Pick<ExperimentUser, 'id' | 'group' | 'workingGroup'>> {
+    request.logger.addFromDetails(__filename, 'init');
+    request.logger.info({ stdout: 'Starting the init call for user', stack_trace: 'null' });
+    const userDocument = await this.experimentUserService.create( [experimentUser], request.logger );
+    if (!userDocument || !userDocument[0]) {
+      request.logger.error({
+        details: 'user document not present',
+      });
+      throw new InternalServerError('user document not present');
+    }
+    // if reinit call is made with any of the below fields not included in the call,
+    // then we will fetch the stored values of the field and return them in the response
+    // for consistent init response with 3 fields ['userId', 'group', 'workingGroup']
+     const { id, group, workingGroup } = userDocument[0];
+     return { id, group, workingGroup };
+   }
 
   /**
    * @swagger
@@ -454,13 +470,26 @@ export class ExperimentClientController {
    *            description: Log blob data
    */
   @Post('bloblog')
-  public blobLog(@Req() request: express.Request): Promise<Log[]> {
-    return new Promise((resolve) => {
+  public blobLog(@Req() request: express.Request): any {
+    return new Promise((resolve, reject) => {
       request.on('readable', async (data) => {
         const blobData = JSON.parse(request.read());
-        const response = await this.experimentAssignmentService.blobDataLog(blobData.userId, blobData.value);
-        resolve(response);
+        try {
+          // The function will throw error if userId doesn't exist
+          const response = await this.experimentAssignmentService.blobDataLog(blobData.userId, blobData.value);
+          resolve(response);
+        } catch (error) {
+          // The error is rejected so promise can now handle this error
+          reject(error);
+        }
       });
+    }).catch((error) => {
+      throw new Error(
+        JSON.stringify({
+          type: SERVER_ERROR.EXPERIMENT_USER_NOT_DEFINED,
+          message: error.message,
+        })
+      );
     });
   }
 
@@ -626,5 +655,14 @@ export class ExperimentClientController {
   @Post('useraliases')
   public setUserAliases(@Body() user: ExperimentUserAliasesValidator): Promise<ExperimentUser[]> {
     return this.experimentUserService.setAliasesForUser(user.userId, user.aliases);
+  }
+
+  @Delete('clearDB')
+  public clearDB(): Promise<string> {
+    // if DEMO mode is enabled, then clear the database:
+    if(env.app.demo) {
+      return this.experimentUserService.clearDB();
+    }
+    return Promise.resolve('DEMO mode is disabled. You cannot clear DB.');
   }
 }
