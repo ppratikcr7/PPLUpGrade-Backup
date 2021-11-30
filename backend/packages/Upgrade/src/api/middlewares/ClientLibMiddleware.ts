@@ -1,3 +1,4 @@
+import { ErrorWithType } from './../errors/ErrorWithType';
 import * as express from 'express';
 import { ExpressMiddlewareInterface } from 'routing-controllers';
 import { LoggerInterface, Logger } from '../../decorators/Logger';
@@ -6,11 +7,12 @@ import { SERVER_ERROR } from 'upgrade_types';
 import * as jwt from 'jsonwebtoken';
 import isequal from 'lodash.isequal';
 import { env } from '../../env';
+import { AppRequest } from '../../types';
 
 export class ClientLibMiddleware implements ExpressMiddlewareInterface {
   constructor(@Logger(__filename) private log: LoggerInterface, public settingService: SettingService) {}
 
-  public async use(req: express.Request, res: express.Response, next: express.NextFunction): Promise<any> {
+  public async use(req: AppRequest, res: express.Response, next: express.NextFunction): Promise<any> {
     try {
       const authorization = req.header('authorization');
       const token = authorization && authorization.replace('Bearer ', '').trim();
@@ -22,6 +24,15 @@ export class ClientLibMiddleware implements ExpressMiddlewareInterface {
       //   const tokenSigned = jwt.sign(data, 'carnegilearning');
       //   console.log('tokenSigned', tokenSigned);
 
+      // adding session id in logger instance:
+      let session_id = null;
+      // if session id received from clientlib request header:
+      if (req.get('Session-Id')) {
+        session_id = req.get('Session-Id');
+      }
+      req.logger.addFromDetails(__filename, 'use');
+      req.logger.child({ client_session_id: session_id });
+      req.logger.debug({ stdout: 'Session Id updated in logger instance' });
       if (setting.toCheckAuth) {
         // throw error if no token
         if (!token) {
@@ -31,7 +42,7 @@ export class ClientLibMiddleware implements ExpressMiddlewareInterface {
           throw error;
         }
         const { secret, key } = env.clientApi;
-        const decodeToken = jwt.verify(token, secret);
+        const decodeToken = jwt.verify(token, secret) as jwt.JwtPayload;
         delete decodeToken.iat;
         delete decodeToken.exp;
 
@@ -45,7 +56,8 @@ export class ClientLibMiddleware implements ExpressMiddlewareInterface {
       } else {
         next();
       }
-    } catch (err: any) {
+    } catch (error) {
+      const err = error as ErrorWithType;
       if (err.message === 'jwt expired') {
         err.type = SERVER_ERROR.INVALID_TOKEN;
         throw err;
