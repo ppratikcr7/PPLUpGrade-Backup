@@ -104,7 +104,6 @@ module "aws-ebs-app" {
   SWAGGER_PASSWORD                 = var.SWAGGER_PASSWORD 
   TOKEN_SECRET_KEY                 = var.TOKEN_SECRET_KEY 
   TYPEORM_SYNCHRONIZE              = var.TYPEORM_SYNCHRONIZE
-  APP_DEMO                         = var.APP_DEMO
   TYPEORM_MAX_QUERY_EXECUTION_TIME = var.TYPEORM_MAX_QUERY_EXECUTION_TIME
 
   PATH_TO_PRIVATE_KEY     = "~/.ssh/id_rsa"

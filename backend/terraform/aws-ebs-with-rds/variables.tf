@@ -82,11 +82,12 @@ variable "APP_NAME" { default = "A/B Testing Backend" }
 variable "APP_PORT" { default = 3030 }
 variable "APP_ROUTE_PREFIX" { default = "/api" }
 variable "APP_SCHEMA" { default = "http" }
+variable "APP_DEMO" { default = "false" }
 variable "AUTH_CHECK" {}
 variable "AWS_REGION" { default = "us-east-1" }
 variable "CLIENT_API_KEY"{}
 variable "CLIENT_API_SECRET"{}
-variable "CONTEXT_METADATA" {}
+variable "METRIC" {}
 variable "CONTROLLERS" { default = "src/api/controllers/**/*Controller.ts" }
 variable "DOMAIN_NAME" { default = "" }
 variable "EMAIL_BUCKET" {}

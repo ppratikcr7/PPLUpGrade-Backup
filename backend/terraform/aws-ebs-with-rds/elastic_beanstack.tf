@@ -174,6 +174,16 @@ resource "aws_elastic_beanstalk_environment" "upgrade-app-prod" {
   }
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
+    name      = "METRIC"
+    value     = var.METRIC
+  }
+  setting {
+    namespace = "aws:elasticbeanstalk:application:environment"
+    name      = "APP_DEMO"
+    value     = var.APP_DEMO
+  }
+  setting {
+    namespace = "aws:elasticbeanstalk:application:environment"
     name      = "CONTROLLERS"
     value     = var.CONTROLLERS
   }
