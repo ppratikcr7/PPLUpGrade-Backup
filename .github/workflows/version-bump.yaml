@@ -53,6 +53,7 @@ jobs:
   backend-build-deploy-dev:
     name: Trigger Backend Build & Deploy Development Env Job
     runs-on: ubuntu-latest
+    environment: development
     if: always() && env.BUILD_BACKEND == 'true'
     steps:
       
@@ -159,8 +160,8 @@ jobs:
   frontend-build-and-deploy-dev:
     name: 'Frontend Build and Deploy DEV'
     runs-on: ubuntu-latest
-    if: always() && env.BUILD_FRONTEND == 'true'
     environment: development
+    if: always() && env.BUILD_FRONTEND == 'true'
     steps:
       - uses: 'actions/checkout@v2'
         with:
@@ -262,6 +263,7 @@ jobs:
   lambda-build-and-deploy:
     name: Lambda Build and Deploy
     runs-on: ubuntu-latest
+    environment: development
     if: always() && env.BUILD_LAMBDA == 'true'
     steps:
       - uses: actions/checkout@v2
