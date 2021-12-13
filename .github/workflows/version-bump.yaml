@@ -68,7 +68,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: version-bump
     environment: development
-    if: always() && ${{ GITHUB_ENV.BUILD_BACKEND }} == 'true'
+    if: always() && env.BUILD_BACKEND == 'true'
     steps:
       - id: var-check
         run: echo $BUILD_BACKEND
