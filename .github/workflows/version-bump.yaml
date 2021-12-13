@@ -54,26 +54,24 @@ jobs:
           echo "BUILD_LAMBDA=$BUILD_LAMBDA" >> $GITHUB_ENV
           echo "BUILD_BACKEND=$BUILD_BACKEND" >> $GITHUB_ENV
           echo "BUILD_FRONTEND=$BUILD_FRONTEND" >> $GITHUB_ENV
-      - id: print
+      - id: var-backend
+        run: echo "::set-output name=backend::$BUILD_BACKEND"
+      - id: var-frontend
+        run: echo "::set-output name=frontend::$BUILD_FRONTEND"
+      - id: var-lambda
+        run: echo "::set-output name=lambda::$BUILD_LAMBDA"
+############################ Trigger build and Deployment ############################
+# Use always() to trigger builds even if other unrelated version bumps failed
+#############################################  BACKEND #############################################
+  backend-build-deploy-dev:
+    name: Trigger Backend Build & Deploy Development Env Job
+    runs-on: ubuntu-latest
+    needs: version-bump
+    environment: development
+    if: always() && ${{ needs.version-bump.outputs.BUILD_BACKEND }} == 'true'
+    steps:
+      - id: var-check
         run: echo $BUILD_BACKEND
-      - id: print2
-        run: echo $BUILD_BACKEND
-#       - id: var-backend
-#         run: echo "::set-output name=backend::env.BUILD_BACKEND"
-#       - id: var-frontend
-#         run: echo "::set-output name=frontend::env.BUILD_FRONTEND"
-#       - id: var-lambda
-#         run: echo "::set-output name=lambda::env.BUILD_LAMBDA"
-# ############################ Trigger build and Deployment ############################
-# # Use always() to trigger builds even if other unrelated version bumps failed
-# #############################################  BACKEND #############################################
-#   backend-build-deploy-dev:
-#     name: Trigger Backend Build & Deploy Development Env Job
-#     runs-on: ubuntu-latest
-#     needs: version-bump
-#     environment: development
-#     if: always() && ${{ needs.version-bump.outputs.BUILD_BACKEND }} == 'true'
-#     steps:
 #       - uses: actions/checkout@v2
 #         with:
 #           ref: 'development'
