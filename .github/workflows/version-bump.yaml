@@ -270,7 +270,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: version-bump
     environment: development
-    if: always() && ${{ needs.version-bump.outputs..BUILD_LAMBDA }} == 'true'
+    if: always() && ${{ needs.version-bump.outputs.BUILD_LAMBDA }} == 'true'
     steps:
       - uses: actions/checkout@v2
         with: 
