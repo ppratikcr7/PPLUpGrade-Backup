@@ -54,7 +54,7 @@ jobs:
     name: Trigger Backend Build & Deploy Development Env Job
     runs-on: ubuntu-latest
     environment: development
-    if: always() && env.BUILD_BACKEND == 'true'
+    if: always() && ${{ env.BUILD_BACKEND }} == 'true'
     steps:
       
       - uses: actions/checkout@v2
@@ -73,35 +73,27 @@ jobs:
       - name: Generate Changelogs
         run: |
           echo 'SLACK_CHANGELOG<<EOF' >> $GITHUB_ENV
-          git log --color=never --pretty='tformat:%xe2%x80%xa2 `%h` %s (%an)' ${{github.event.client_payload.before}}..${{github.event.client_payload.after}} >> $GITHUB_ENV
+          git log --color=never --pretty='tformat:%xe2%x80%xa2 `%h` %s (%an)' ${{github.event.before}}..${{github.event.after}} >> $GITHUB_ENV
           echo 'EOF' >> $GITHUB_ENV
           echo 'RELEASE_CHANGELOG<<EOF' >> $GITHUB_ENV
-          git log --color=never --pretty=' - %h %s' ${{github.event.client_payload.before}}..${{github.event.client_payload.after}} >> $GITHUB_ENV
+          git log --color=never --pretty=' - %h %s' ${{github.event.before}}..${{github.event..after}} >> $GITHUB_ENV
           echo 'EOF' >> $GITHUB_ENV
       #############################################  Build Steps #############################################
       - name: Build backend
         working-directory: backend
         run: |
           npm ci
-          zip -qq -r ${{ github.event.client_payload.tag }}.zip node_modules packages/Upgrade Dockerfile Dockerrun.aws.json package.json tsconfig.json tslint.json
+          zip -qq -r upgrade-backend-v-${{ github.sha }}.zip node_modules packages/Upgrade Dockerfile Dockerrun.aws.json package.json tsconfig.json tslint.json
           
       - name: Create Release
         uses: ncipollo/release-action@v1
         with:
-          artifacts: backend/${{ github.event.client_payload.tag }}.zip
-          tag: ${{ github.event.client_payload.tag }}
-          name: ${{ github.event.client_payload.tag }}
+          artifacts: backend/upgrade-backend-v-${{ github.sha }}.zip
+          tag: upgrade-backend-v-${{ github.sha }}
+          name: upgrade-backend-v-${{ github.sha }}
           body: ${{ env.RELEASE_CHANGELOG }}
           commit: main
           token: ${{ secrets.GITHUB_TOKEN }}
-      
-      - name: Trigger Deployment Workflow
-        uses: peter-evans/repository-dispatch@v1
-        with:
-          token: ${{ secrets.REPO_DISPATCH_TOKEN }}
-          repository: ${{ github.repository }}
-          event-type: trigger-backend-deployment
-          client-payload: '{"tag": "${{ github.event.client_payload.tag }}"}'
 
       - name: Success Slack Message
         uses: aibexhq/slack-rich-notify@v2.0.1
@@ -109,7 +101,7 @@ jobs:
           token: ${{ secrets.SLACK_TOKEN }}
           channel: ${{ secrets.SLACK_BUILD_CHANNEL }}
           message: |
-            *<https://github.com/${{ github.event.repository.full_name }}/releases/tag/${{ github.event.client_payload.tag }}|${{ github.event.client_payload.tag }}> build was successful*
+            *<https://github.com/${{ github.event.repository.full_name }}/releases/tag/upgrade-backend-v-${{ github.sha }}|upgrade-backend-v-${{ github.sha }}> build was successful*
             ${{ env.SLACK_CHANGELOG }}
 
       - name: Failure Slack Message
@@ -119,7 +111,7 @@ jobs:
           token: ${{ secrets.SLACK_TOKEN }}
           channel: ${{ secrets.SLACK_BUILD_CHANNEL }}
           message: |
-            ${{ secrets.SLACK_FAILURE_PINGS}} *${{ github.event.client_payload.tag }} build FAILURE*
+            ${{ secrets.SLACK_FAILURE_PINGS}} *upgrade-backend-v-${{ github.sha }} build FAILURE*
             <https://github.com/${{ github.event.repository.full_name }}/actions/runs/${{ github.run_id }}|Click here to view the full log>
             ${{ env.SLACK_CHANGELOG }}
       
@@ -132,10 +124,10 @@ jobs:
           aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           application_name: ${{ secrets.EB_APP_NAME }}
           environment_name: ${{ secrets.EB_ENV_NAME }}
-          version_label: ${{ github.event.client_payload.tag }}
+          version_label: upgrade-backend-v-${{ github.sha }}
           region: ${{ secrets.AWS_REGION }}
           use_existing_version_if_available: true
-          deployment_package: backend/${{ github.event.client_payload.tag }}.zip
+          deployment_package: backend/upgrade-backend-v-${{ github.sha }}.zip
 
       - name: Success Deploy Message
         uses: aibexhq/slack-rich-notify@v2.0.1
@@ -143,7 +135,7 @@ jobs:
           token: ${{ secrets.SLACK_TOKEN }}
           channel: ${{ secrets.SLACK_DEPLOY_CHANNEL }}
           message: |
-            *<https://github.com/${{ github.event.repository.full_name }}/releases/tag/${{ github.event.client_payload.tag }}|${{ github.event.client_payload.tag }}>* has been deployed to the `development` environment at ${{ secrets.ENV_URL}}
+            *<https://github.com/${{ github.event.repository.full_name }}/releases/tag/upgrade-backend-v-${{ github.sha }}|upgrade-backend-v-${{ github.sha }}>* has been deployed to the `development` environment at ${{ secrets.ENV_URL}}
             ${{ env.SLACK_CHANGELOG }}
 
       - name: Failure Deploy Message
@@ -153,7 +145,7 @@ jobs:
           token: ${{ secrets.SLACK_TOKEN }}
           channel: ${{ secrets.SLACK_DEPLOY_CHANNEL }}
           message: |
-            ${{ secrets.SLACK_FAILURE_PINGS}} *<https://github.com/${{ github.event.repository.full_name }}/releases/tag/${{ github.event.client_payload.tag }}|${{ github.event.client_payload.tag }}> deployment FAILURE*
+            ${{ secrets.SLACK_FAILURE_PINGS}} *<https://github.com/${{ github.event.repository.full_name }}/releases/tag/upgrade-backend-v-${{ github.sha }}|upgrade-backend-v-${{ github.sha }}> deployment FAILURE*
             <https://github.com/${{ github.event.repository.full_name }}/actions/runs/${{ github.run_id }}|Click here to view the full log>
             ${{ env.SLACK_CHANGELOG }}
 #############################################  FRONTEND ############################################# 
@@ -161,11 +153,11 @@ jobs:
     name: 'Frontend Build and Deploy DEV'
     runs-on: ubuntu-latest
     environment: development
-    if: always() && env.BUILD_FRONTEND == 'true'
+    if: always() && ${{ env.BUILD_FRONTEND }} == 'true'
     steps:
       - uses: 'actions/checkout@v2'
         with:
-          ref: ${{ github.event.client_payload.branch }}
+          ref: 'development'
           fetch-depth: 0
 
       - uses: actions/setup-node@v2
@@ -180,10 +172,10 @@ jobs:
       - name: Generate Changelogs
         run: |
           echo 'SLACK_CHANGELOG<<EOF' >> $GITHUB_ENV
-          git log --color=never --pretty='tformat:%xe2%x80%xa2 `%h` %s (%an)' ${{github.event.client_payload.before}}..${{github.event.client_payload.after}} >> $GITHUB_ENV
+          git log --color=never --pretty='tformat:%xe2%x80%xa2 `%h` %s (%an)' ${{ github.event.before }}..${{github.event.after}} >> $GITHUB_ENV
           echo 'EOF' >> $GITHUB_ENV
           echo 'RELEASE_CHANGELOG<<EOF' >> $GITHUB_ENV
-          git log --color=never --pretty=' - %h %s' ${{github.event.client_payload.before}}..${{github.event.client_payload.after}} >> $GITHUB_ENV
+          git log --color=never --pretty=' - %h %s' ${{github.event.before}}..${{github.event.after}} >> $GITHUB_ENV
           echo 'EOF' >> $GITHUB_ENV
 #############################################  Build Steps #############################################
       - name: Build Frontend
@@ -194,15 +186,15 @@ jobs:
           
       - name: Zip
         working-directory: frontend/dist/upgrade
-        run: zip -r ${{ github.event.client_payload.tag }}.zip *
+        run: zip -r upgrade-backend-v-${{ github.sha }}.zip *
 
       - name: Create Release
         uses: ncipollo/release-action@v1
         with:
-          artifacts: frontend/dist/upgrade/${{ github.event.client_payload.tag }}.zip
+          artifacts: frontend/dist/upgrade/upgrade-backend-v-${{ github.sha }}.zip
           allowUpdates: true
-          tag: ${{ github.event.client_payload.tag }}
-          name: ${{ github.event.client_payload.tag }}
+          tag: upgrade-backend-v-${{ github.sha }}
+          name: upgrade-backend-v-${{ github.sha }}
           body: ${{ env.RELEASE_CHANGELOG }}
           commit: main
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -213,7 +205,7 @@ jobs:
           token: ${{ secrets.SLACK_TOKEN }}
           channel: ${{ secrets.SLACK_BUILD_CHANNEL }}
           message: |
-            *<https://github.com/${{ github.event.repository.full_name }}/releases/tag/${{ github.event.client_payload.tag }}|${{ github.event.client_payload.tag }}> build was successful*
+            *<https://github.com/${{ github.event.repository.full_name }}/releases/tag/upgrade-backend-v-${{ github.sha }}|upgrade-backend-v-${{ github.sha }}> build was successful*
             ${{ env.SLACK_CHANGELOG }}
 
       - name: Failure Build Message
@@ -223,7 +215,7 @@ jobs:
           token: ${{ secrets.SLACK_TOKEN }}
           channel: ${{ secrets.SLACK_BUILD_CHANNEL }}
           message: |
-            ${{ secrets.SLACK_FAILURE_PINGS}} *${{ github.event.client_payload.tag }} build FAILURE*
+            ${{ secrets.SLACK_FAILURE_PINGS}} *upgrade-backend-v-${{ github.sha }} build FAILURE*
             <https://github.com/${{ github.event.repository.full_name }}/actions/runs/${{ github.run_id }}|Click here to view the full log>
             ${{ env.SLACK_CHANGELOG }}
 #############################################  Deploy Steps #############################################
@@ -246,7 +238,7 @@ jobs:
           token: ${{ secrets.SLACK_TOKEN }}
           channel: ${{ secrets.SLACK_DEPLOY_CHANNEL }}
           message: |
-            *<https://github.com/${{ github.event.repository.full_name }}/releases/tag/${{ github.event.client_payload.tag }}|${{ github.event.client_payload.tag }}>* has been deployed to the `development` environment at ${{ secrets.ENV_FRONTEND_URL }}
+            *<https://github.com/${{ github.event.repository.full_name }}/releases/tag/upgrade-backend-v-${{ github.sha }}|upgrade-backend-v-${{ github.sha }}>* has been deployed to the `development` environment at ${{ secrets.ENV_FRONTEND_URL }}
             ${{ env.SLACK_CHANGELOG }}
 
       - name: Failure Deploy Message
@@ -256,7 +248,7 @@ jobs:
           token: ${{ secrets.SLACK_TOKEN }}
           channel: ${{ secrets.SLACK_DEPLOY_CHANNEL }}
           message: |
-            ${{ secrets.SLACK_FAILURE_PINGS}} *<https://github.com/${{ github.event.repository.full_name }}/releases/tag/${{ github.event.client_payload.tag }}|${{ github.event.client_payload.tag }}> deployment FAILURE*
+            ${{ secrets.SLACK_FAILURE_PINGS}} *<https://github.com/${{ github.event.repository.full_name }}/releases/tag/upgrade-backend-v-${{ github.sha }}|upgrade-backend-v-${{ github.sha }}> deployment FAILURE*
             <https://github.com/${{ github.event.repository.full_name }}/actions/runs/${{ github.run_id }}|Click here to view the full log>
             ${{ env.SLACK_CHANGELOG }}
 #################################### LAMBDA ###########################################################      
@@ -264,11 +256,11 @@ jobs:
     name: Lambda Build and Deploy
     runs-on: ubuntu-latest
     environment: development
-    if: always() && env.BUILD_LAMBDA == 'true'
+    if: always() && ${{ env.BUILD_LAMBDA }} == 'true'
     steps:
       - uses: actions/checkout@v2
         with: 
-          ref: ${{ github.event.client_payload.tag }}
+          ref: 'development'
           fetch-depth: 0
 
       - uses: actions/setup-node@v2
@@ -284,10 +276,10 @@ jobs:
       - name: Generate Changelogs
         run: |
           echo 'SLACK_CHANGELOG<<EOF' >> $GITHUB_ENV
-          git log --color=never --pretty='tformat:%xe2%x80%xa2 `%h` %s (%an)' ${{github.event.client_payload.before}}..${{github.event.client_payload.after}} >> $GITHUB_ENV
+          git log --color=never --pretty='tformat:%xe2%x80%xa2 `%h` %s (%an)' ${{github.event.before}}..${{github.event.after}} >> $GITHUB_ENV
           echo 'EOF' >> $GITHUB_ENV
           echo 'RELEASE_CHANGELOG<<EOF' >> $GITHUB_ENV
-          git log --color=never --pretty=' - %h %s' ${{github.event.client_payload.before}}..${{github.event.client_payload.after}} >> $GITHUB_ENV
+          git log --color=never --pretty=' - %h %s' ${{github.event.before}}..${{github.event.after}} >> $GITHUB_ENV
           echo 'EOF' >> $GITHUB_ENV
 #############################################  Build Steps #############################################
       - name: Build
@@ -351,7 +343,7 @@ jobs:
           token: ${{ secrets.SLACK_TOKEN }}
           channel: ${{ secrets.SLACK_DEPLOY_CHANNEL }}
           message: |
-            *<https://github.com/${{ github.event.repository.full_name }}/releases/tag/upgrade-lambda-v${{ steps.package-version.outputs.current-version }}|UpGrade Lambda ${{ steps.package-version.outputs.current-version }}>* has been deployed to the `staging` environment
+            *<https://github.com/${{ github.event.repository.full_name }}/releases/tag/upgrade-lambda-v${{ steps.package-version.outputs.current-version }}|UpGrade Lambda ${{ steps.package-version.outputs.current-version }}>* has been deployed to the `development` environment
             ${{ env.SLACK_CHANGELOG }}
 
       - name: Lambda Failure Deploy Message
