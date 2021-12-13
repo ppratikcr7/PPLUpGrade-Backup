@@ -12,6 +12,11 @@ on:
       - '**/.prettier*'
       - '**/locust/**'
       - '**/.editoreconfig'
+env:
+  BUILD_LAMBDA: 'false'
+  BUILD_BACKEND: 'false'
+  BUILD_FRONTEND: 'false'
+
 jobs:
   version-bump:
     name: Version Bump
@@ -31,9 +36,6 @@ jobs:
       # The *_FILES variables are lists of file prefixes
       - shell: bash
         run: |
-          BUILD_LAMBDA=false
-          BUILD_BACKEND=false
-          BUILD_FRONTEND=false
           BACKEND_FILES=".github/workflows/backend backend/packages/Upgrade backend/Docker backend/package"
           LAMBDA_FILES=".github/workflows/lambda backend/packages/Schedular"
           FRONTEND_FILES=".github/workflows/frontend frontend/"
@@ -53,15 +55,9 @@ jobs:
           echo "BUILD_BACKEND=$BUILD_BACKEND" >> $GITHUB_ENV
           echo "BUILD_FRONTEND=$BUILD_FRONTEND" >> $GITHUB_ENV
       - id: print
-        run: 
-          echo "env.BUILD_BACKEND"
-          echo "env.BUILD_FRONTEND"
-          echo "env.BUILD_LAMBDA"
+        run: echo $BUILD_BACKEND
       - id: print2
-        run: 
-          echo "BUILD_BACKEND"
-          echo "BUILD_FRONTEND"
-          echo "BUILD_LAMBDA"
+        run: echo $BUILD_BACKEND
 #       - id: var-backend
 #         run: echo "::set-output name=backend::env.BUILD_BACKEND"
 #       - id: var-frontend
