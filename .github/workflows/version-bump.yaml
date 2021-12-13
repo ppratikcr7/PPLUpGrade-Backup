@@ -68,7 +68,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: version-bump
     environment: development
-    if: always() && ${{ needs.version-bump.outputs.BUILD_BACKEND1 }} == 'true'
+    if: ${{ needs.version-bump.outputs.BUILD_BACKEND1 }} == 'true'
     steps:
       - id: var-check
         run: echo val- ${{ needs.version-bump.outputs.BUILD_BACKEND1}}
