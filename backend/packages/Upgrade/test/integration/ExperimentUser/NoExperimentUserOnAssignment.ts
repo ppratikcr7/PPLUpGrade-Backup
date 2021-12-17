@@ -2,14 +2,13 @@ import { Container } from 'typedi';
 import { individualAssignmentExperiment } from '../mockData/experiment';
 import { ExperimentService } from '../../../src/api/services/ExperimentService';
 import { UserService } from '../../../src/api/services/UserService';
-import { Logger as WinstonLogger } from '../../../src/lib/logger';
 import { systemUser } from '../mockData/user/index';
-import { getAllExperimentCondition, markExperimentPoint } from '../utils';
+import { getAllExperimentCondition } from '../utils';
 import { experimentUsers } from '../mockData/experimentUsers/index';
 import { ExperimentUserService } from '../../../src/api/services/ExperimentUserService';
+import { UpgradeLogger } from '../../../src/lib/logger/UpgradeLogger';
 
 export default async function testCase(): Promise<void> {
-  const logger = new WinstonLogger(__filename);
   const experimentService = Container.get<ExperimentService>(ExperimentService);
   const userService = Container.get<UserService>(UserService);
   const experimentUserService = Container.get<ExperimentUserService>(ExperimentUserService);
@@ -39,8 +38,7 @@ export default async function testCase(): Promise<void> {
   expect(experimentUser.length).toEqual(0);
 
   // get all experiment condition for user 1
-  const experimentConditionAssignments = await getAllExperimentCondition(experimentUsers[0].id);
-  expect(experimentConditionAssignments).toHaveLength(0);
+  await expect(getAllExperimentCondition(experimentUsers[0].id, new UpgradeLogger())).resolves.toEqual([]);
 
   experimentUser = await experimentUserService.find();
   expect(experimentUser.length).toEqual(1);
