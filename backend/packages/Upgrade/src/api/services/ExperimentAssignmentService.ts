@@ -228,7 +228,7 @@ export class ExperimentAssignmentService {
   ): Promise<IExperimentAssignment[]> {
     const { logger, userDoc } = requestContext;
     logger.info({ message: `getAllExperimentConditions: User: ${userId}` });
-    const previewUser: PreviewUser = await this.previewUserService.findOne(userId);
+    const previewUser: PreviewUser = await this.previewUserService.findOne(userId, logger);
     let experimentUser: ExperimentUser = userDoc;
 
     // create user if user not defined
@@ -497,8 +497,8 @@ export class ExperimentAssignmentService {
     } catch (err) {
       const error = err as ErrorWithType;
       error.details = 'Error in assignment'
-      logger.error({ message: error, stack: error.stack });
       error.type = SERVER_ERROR.ASSIGNMENT_ERROR;
+      logger.error(error);
       throw error;
     }
   }
