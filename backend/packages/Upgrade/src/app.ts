@@ -31,7 +31,7 @@ bootstrapMicroframework({
   .then(() => {
     const logger = new UpgradeLogger();
     // logging data after the winston is configured
-    logger.info({detail: 'Server starting at ' + Date.now()});
+    logger.info({ detail: 'Server starting at ' + Date.now() });
     return CreateSystemUser();
   })
   .then(() => {
@@ -42,4 +42,3 @@ bootstrapMicroframework({
     // metric initalization
     return InitMetrics();
   });
-
