@@ -94,7 +94,7 @@ jobs:
           git log --color=never --pretty=' - %h %s' ${{github.event.before}}..${{github.event.after}} >> $GITHUB_ENV
           echo 'EOF' >> $GITHUB_ENV
       #############################################  Build Steps #############################################
-       - name: Build types
+      - name: Build types
         working-directory: types
         run: |
           npm install
