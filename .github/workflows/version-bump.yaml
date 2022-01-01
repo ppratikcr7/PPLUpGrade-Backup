@@ -103,9 +103,8 @@ jobs:
       - name: Build backend
         working-directory: backend
         run: |
+          cp -R ../types packages/Upgrade
           npm ci
-          cd packages/Upgrade && npm ci
-          npm run build
           zip -qq -r upgrade-backend-v-${{ github.sha }}.zip node_modules packages/Upgrade Dockerfile Dockerrun.aws.json package.json tsconfig.json tslint.json
           
       - name: Create Release
