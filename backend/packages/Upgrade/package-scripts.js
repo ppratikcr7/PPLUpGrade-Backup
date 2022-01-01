@@ -159,7 +159,7 @@ module.exports = {
        * Run type check while build
        */
       build: {
-        script: "tsc --noEmit ./tsconfig.build.json",
+        script: "tsc --noEmit --project ./tsconfig.build.json",
         description: "Typecheck the project without emitting the output"
       }
     },
