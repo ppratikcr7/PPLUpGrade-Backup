@@ -155,12 +155,7 @@ export class ExperimentUserService {
 
   public async updateWorkingGroup(userId: string, workingGroup: any, requestContext: {logger: UpgradeLogger, userDoc: any}): Promise<ExperimentUser> {
     const { logger, userDoc } = requestContext;
-    let userExist;
-    if (userDoc['user']) {
-      userExist = userDoc['user'];
-    } else {
-      userExist = userDoc;
-    }
+    let userExist = userDoc;
     logger.info({ message: 'Update working group for user: ' + userId, details: workingGroup });
     if (!userExist) {
       throw new Error(
@@ -184,12 +179,7 @@ export class ExperimentUserService {
   // TODO should we check for workingGroup as a subset over here?
   public async updateGroupMembership(userId: string, groupMembership: any, requestContext: {logger: UpgradeLogger, userDoc: any} ): Promise<ExperimentUser> { 
     const { logger, userDoc } = requestContext;
-    let userExist;
-    if (userDoc['user']) {
-      userExist = userDoc['user'];
-    } else {
-      userExist = userDoc;
-    }
+    let userExist = userDoc;
     logger.info({ message: `Set Group Membership for userId: ${userId} with Group membership details as below:`, details: groupMembership });
     if (!userExist) {
       throw new Error(
