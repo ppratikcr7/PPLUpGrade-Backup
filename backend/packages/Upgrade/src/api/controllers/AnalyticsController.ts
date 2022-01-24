@@ -7,7 +7,6 @@ import { EnrollmentDetailAnalyticsValidator } from './validators/EnrollmentDetai
 import { DataExportValidator } from './validators/DataExportValidator';
 import { AppRequest } from '../../types';
 
-
 /**
  * @swagger
  * tags:
