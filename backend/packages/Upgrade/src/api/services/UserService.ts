@@ -9,6 +9,7 @@ import { UpgradeLogger } from '../../lib/logger/UpgradeLogger';
 import { AWSService } from './AWSService';
 import { env } from '../../env';
 import { ErrorWithType } from '../errors/ErrorWithType';
+import { Emails } from '../../templates/email';
 
 @Service()
 export class UserService {
@@ -16,11 +17,22 @@ export class UserService {
     @OrmRepository()
     private userRepository: UserRepository,
     public awsService: AWSService,
+    public emails: Emails
   ) {}
 
   public async upsertUser(user: User, logger: UpgradeLogger): Promise<User> {
     logger.info({ message: `Upsert a new user => ${JSON.stringify(user, undefined, 2)}` });
-    this.sendWelcomeEmail(user.email);
+
+    const isUserExists = await this.userRepository.findOne({ email: user.email });
+    if (!isUserExists) {
+      this.sendWelcomeEmail(user.email)
+    }
+    return this.userRepository.upsertUser(user);
+  }
+
+  public async upsertAdminUser(user: User, logger: UpgradeLogger): Promise<User> {
+    logger.info({ message: `Upsert a new Admin user => ${JSON.stringify(user, undefined, 2)}` });
+
     return this.userRepository.upsertUser(user);
   }
 
@@ -73,6 +85,7 @@ export class UserService {
   }
 
   public updateUserRole(email: string, role: UserRole): Promise<User> {
+    this.sendRoleChangedEmail(email, role);
     return this.userRepository.updateUserRole(email, role);
   }
 
@@ -99,7 +112,7 @@ export class UserService {
         break;
       default:
         // TODO: Update column name
-        // searchString.push("coalesce(users.firstName::TEXT,'')");
+        // searchString.push("coalesce(users.firstName::TEXT,'')"); 
         // searchString.push("coalesce(users.lastName::TEXT,'')");
         searchString.push("coalesce(users.email::TEXT,'')");
         searchString.push("coalesce(users.role::TEXT,'')");
@@ -109,17 +122,46 @@ export class UserService {
     const searchStringConcatenated = `concat_ws(' ', ${stringConcat})`;
     return searchStringConcatenated;
   }
+  
+  public sendWelcomeEmail(email: string): void {
+    const emailSubject = `Welcome to UpGrade!`;
+    const emailBody = `Greetings!, 
+    <br>
+    A new user account was created for you in UpGrade. You can sign into UpGrade using your Google credentials.
+    <br>
+    Click here to log in: <a href="http://www.localhost:4200">UPGRADE</a>
+    <br>
+    To know more about how UpGrade works, please visit 
+    <a href="https://www.upgradeplatform.org/"> www.upgradeplatform.org</a>
+    . To read the documentation, visit 
+    <a href="https://upgrade-platform.gitbook.io/upgrade-documentation/"> UpGrade-docs</a>
+    <br>`;
 
-  public async sendWelcomeEmail(email: string):Promise<string> {
+    this.sendEmail(email, emailSubject, emailBody);
+  }
+
+  public sendRoleChangedEmail(email: string, role: UserRole): void {
+    const emailSubject = `UpGrade Role Changed`;
+    const emailBody = `Greetings!, 
+    <br>
+    Your Role in Upgrade is changed to ${role}!
+    <br>
+    Click here to log in: <a href="http://www.localhost:4200">UPGRADE</a>
+    <br>
+    To know more about how UpGrade works, please visit 
+    <a href="https://www.upgradeplatform.org/"> www.upgradeplatform.org</a>
+    . To read the documentation, visit 
+    <a href="https://upgrade-platform.gitbook.io/upgrade-documentation/"> UpGrade-docs</a>
+    <br>`;
+
+    this.sendEmail(email, emailSubject, emailBody);
+  }
+
+  public async sendEmail(email_to: string, emailSubject: string, emailBody: string):Promise<string> {
     try {
       const email_from = env.email.from;
-      const emailText = `Hey, 
-      <br>
-      Welcome to the Upgrade!
-      <br>`;
-
-      const emailSubject = `Welcome Mail for new User`;
-      await this.awsService.sendEmail(email_from, email, emailText, emailSubject);
+      const emailText = this.emails.generateEmailText(emailBody);
+      await this.awsService.sendEmail(email_from, email_to, emailText, emailSubject);
     } catch (err) {
       const error = err as ErrorWithType;
       error.type = SERVER_ERROR.EMAIL_SEND_ERROR;
