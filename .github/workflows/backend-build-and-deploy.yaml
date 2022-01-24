@@ -36,6 +36,7 @@ jobs:
       - name: Build backend
         working-directory: backend
         run: |
+          cp -R ../types packages/Upgrade
           npm ci
           zip -qq -r ${{ github.event.client_payload.tag }}.zip node_modules packages/Upgrade Dockerfile Dockerrun.aws.json package.json tsconfig.json tslint.json
           
