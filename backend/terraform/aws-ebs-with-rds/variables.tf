@@ -46,6 +46,12 @@ variable "storage_type" {
   description = "Instance storage type"
 }
 
+variable "replica_names" {
+  description = "Replica names"
+  type        = list(string)
+  default     = []
+}
+
 # ---------------------------------------------------------------------------------------------------------------------
 # POSTGRESS SECURITY SPECIFIC VARIABLES 
 # ---------------------------------------------------------------------------------------------------------------------
@@ -94,7 +100,7 @@ variable "EMAIL_BUCKET" {}
 variable "EMAIL_EXPIRE_AFTER_SECONDS" {}
 variable "EMAIL_FROM" {}
 variable "GOOGLE_CLIENT_ID" { }
-variable "HOST_URL" { default = "http://upgrade-development.us-east-1.elasticbeanstalk.com/api" }
+variable "HOST_URL" { default = "https://upgrade-dev-backend.edoptimize.com/api" }
 variable "INTERCEPTORS" { default = "src/api/interceptors/**/*Interceptor.ts" }
 variable "LOG_LEVEL" { default = "debug" }
 variable "LOG_OUTPUT" { default = "dev" }
@@ -116,6 +122,8 @@ variable "SWAGGER_ROUTE" { default = "/swagger" }
 variable "SWAGGER_USERNAME" { default = "admin" }
 variable "TOKEN_SECRET_KEY" { }
 variable "TYPEORM_CONNECTION" { default = "postgres" }
+variable "TYPEORM_HOST" { default = "localhost" }
+variable "TYPEORM_HOSTNAME_REPLICAS" { default = "[ 'localhost' ]" }
 variable "TYPEORM_ENTITIES" { default = "src/api/models/**/*.ts" }
 variable "TYPEORM_ENTITIES_DIR" { default = "src/api/models" }
 variable "TYPEORM_FACTORY" { default = "src/database/factories/**/*.factory.ts" }

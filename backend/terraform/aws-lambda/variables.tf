@@ -42,7 +42,7 @@ variable "output_path" {
 
 variable "function_name" {
   description = "Lambda function name "
-  default     = "Schedule"
+  default     = "Schedular"
 }
 
 variable "function_handler" {
@@ -52,7 +52,7 @@ variable "function_handler" {
 
 variable "runtime" {
   description = "Lambda function runtime"
-  default     = "nodejs10.x"
+  default     = "nodejs14.x"
 }
 
 variable "TOKEN_SECRET_KEY" { 

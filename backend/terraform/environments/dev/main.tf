@@ -28,9 +28,9 @@ module "aws_lambda_function" {
   prefix                = var.prefix 
   app_version           = var.app_version  
   output_path           = "../environments/${var.current_directory}/.terraform"  
-  function_name         = "Schedule" 
+  function_name         = "Schedular" 
   function_handler      = "schedule.schedule"
-  runtime               =  "nodejs10.x"
+  runtime               =  "nodejs14.x"
   s3_lambda_bucket      = var.s3_lambda_bucket
   s3_lambda_key         = var.s3_lambda_key
 }
@@ -75,7 +75,8 @@ module "aws-ebs-app" {
   identifier            = var.identifier
   instance_class        = var.instance_class
   storage_type          = var.storage_type
-  multi_az = "false"
+  multi_az              = "false"
+  replica_names         = var.replica_names
   
   /*EBS config*/
   app_instance_type     = var.app_instance_type

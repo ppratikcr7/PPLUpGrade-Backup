@@ -5,7 +5,7 @@
 
 resource "aws_iam_instance_profile" "app-ec2-role" {
   
-  name = "${var.environment}-${var.prefix}-app-instance-profile"
+  name = "${var.environment}-${var.prefix}-app-instance-profile-new"
   role = aws_iam_role.app-ec2-role.name
 }
 

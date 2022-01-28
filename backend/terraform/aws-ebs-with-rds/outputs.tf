@@ -10,3 +10,6 @@ output "application" {
   value = aws_elastic_beanstalk_environment.upgrade-app-prod.application
 }
 
+output "rds-endpoints" {
+  value = jsonencode([for endPoint in aws_db_instance.app-rds-read-replica.*.endpoint : split(":", endPoint)[0]])
+}

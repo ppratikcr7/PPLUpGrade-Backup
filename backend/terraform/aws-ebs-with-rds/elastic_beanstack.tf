@@ -286,6 +286,11 @@ resource "aws_elastic_beanstalk_environment" "upgrade-app-prod" {
   }
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
+    name      = "RDS_HOSTNAME_REPLICAS"
+    value     = jsonencode([for endPoint in aws_db_instance.app-rds-read-replica.*.endpoint : split(":", endPoint)[0]])
+  }
+  setting {
+    namespace = "aws:elasticbeanstalk:application:environment"
     name      = "RDS_PASSWORD"
     value     = aws_db_instance.app-rds.password
   }
@@ -346,6 +351,16 @@ resource "aws_elastic_beanstalk_environment" "upgrade-app-prod" {
   }
   setting {
     namespace = "aws:elasticbeanstalk:application:environment"
+    name      = "TYPEORM_HOST"
+    value     = var.TYPEORM_HOST
+  }
+  setting {
+    namespace = "aws:elasticbeanstalk:application:environment"
+    name      = "TYPEORM_HOSTNAME_REPLICAS"
+    value     = var.TYPEORM_HOSTNAME_REPLICAS
+  }
+  setting {
+    namespace = "aws:elasticbeanstalk:application:environment"
     name      = "TYPEORM_ENTITIES"
     value     = var.TYPEORM_ENTITIES
   }
@@ -394,4 +409,5 @@ resource "aws_elastic_beanstalk_environment" "upgrade-app-prod" {
     name      = "TYPEORM_SYNCHRONIZE"
     value     = var.TYPEORM_SYNCHRONIZE
   }
+  
 }
